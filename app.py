@@ -1,114 +1,123 @@
 import streamlit as st
+import time
+import math
 import random
 
 # ==========================================================
-# 1. ULTRALIGHT DİZAYN (Ağ və Professional)
+# 1. ULTRALIGHT VİZUAL DİZAYN (PROFESSİONAL AĞ REJİM)
 # ==========================================================
-st.set_page_config(page_title="A-Zeka: Qlobal Alim", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="A-Zeka Ultra: Qlobal Zəka", page_icon="🧠", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #ffffff; color: #1a1a1a; }
-    .stChatMessage { border-radius: 15px; padding: 18px; margin-bottom: 12px; border: 1px solid #dee2e6; font-family: 'Segoe UI', sans-serif; }
-    [data-testid="stChatMessageUser"] { background-color: #f1f3f5; border-left: 5px solid #6c757d; }
-    [data-testid="stChatMessageAssistant"] { background-color: #e7f3ff; border-left: 5px solid #007bff; }
-    .header-text { font-size: 42px; font-weight: 800; color: #0056b3; text-align: center; padding: 20px; }
+    .stApp { background-color: #ffffff; color: #1a1b1e; }
+    .stChatMessage { border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #edf2f7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    [data-testid="stChatMessageUser"] { background-color: #f7fafc; border-right: 5px solid #cbd5e0; }
+    [data-testid="stChatMessageAssistant"] { background-color: #ebf8ff; border-left: 5px solid #3182ce; }
+    .main-title { font-size: 50px; font-weight: 900; color: #2b6cb0; text-align: center; letter-spacing: -1px; }
+    .scientist-badge { background-color: #3182ce; color: white; padding: 5px 15px; border-radius: 50px; font-size: 14px; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown('<p class="header-text">🧠 A-ZEKA: GLOBAL SCIENTIST</p>', unsafe_allow_html=True)
-st.sidebar.markdown("<h2 style='text-align: center;'>A-Zeka Lab</h2>", unsafe_allow_html=True)
-st.sidebar.write("---")
-st.sidebar.success("Yaradıcı: Abdullah Mikayılov")
-st.sidebar.info("Səviyyə: Universal Alim (Bütün Fənlər)")
+# ==========================================================
+# 2. NEHENG ELMİ ARXİV (BÜTÜN FƏNLƏR - ALİM SƏVİYYƏSİ)
+# ==========================================================
+# Bu bölmə A-Zeka-nın "Daxili Beyni"dir. İnternetsiz belə bunları bilir.
 
-# ==========================================================
-# 2. MULTİ-FƏNN BİLGİ BAZASI (Nəhəng Alim Yaddaşı)
-# ==========================================================
-DATA_BASE = {
-    # RİYAZİYYAT
-    "riyaziyyat": "Riyaziyyat kainatın dilidir. Pifaqor: $a^2+b^2=c^2$, Viyet: $x_1+x_2=-b/a$, Törəmə: $(x^n)'=nx^{n-1}$, İnteqral: $\int x^n dx$.",
-    # FİZİKA
-    "fizika": "Fizika maddə və enerjini öyrənir. Nyuton: $F=ma$, Eynşteyn: $E=mc^2$, Om qanunu: $I=U/R$, Kvant: $E=hf$.",
-    # KİMYA
-    "kimya": "Kimya maddələrin tərkibidir. Periyodik cədvəl 118 elementdən ibarətdir. Su: $H_2O$, Sulfat turşusu: $H_2SO_4$, Metan: $CH_4$.",
-    # BİOLOGİYA
-    "biologiya": "Biologiya həyat elmidir. DNT həyatın kodudur. Mitoxondri hüceyrənin enerji mərkəzidir. Fotosintez: $6CO_2 + 6H_2O \\to C_6H_{12}O_6 + 6O_2$.",
-    # TARİX
-    "tarix": "Tarix bəşəriyyətin yaddaşıdır. 1501 Səfəvilər, 1918 ADR-in qurulması, 1945 II Dünya Müharibəsinin sonu.",
-    # COĞRAFİYA
-    "coğrafiya": "Yer kürəsi 7 qitədən ibarətdir. Ən hündür zirvə Everest (8848m), ən dərin yer Marian çökəkliyi (11022m).",
-    # ASTRONOMİYA
-    "astronomiya": "Kainat 13.8 milyard yaşındadır. Günəş sistemi 8 planetdən ibarətdir. Süd yolu bizim qalaktikamızdır."
+ALIM_BEYNI = {
+    "riyaziyyat": {
+        "cebr": "Viyet ($x_1+x_2=-b/a$), Diskriminant ($D=b^2-4ac$), Loqarifma ($\log_a b$), Funksiya.",
+        "hendese": "Pifaqor ($a^2+b^2=c^2$), Heron ($S=\sqrt{p(p-a)(p-b)(p-c)}$), Sinuslar teoremi.",
+        "analiz": "Törəmə ($f'(x)$), İnteqral ($\int$), Limit, Diferensial tənliklər.",
+        "ehtimal": "Klassik ehtimal $P(A)=m/n$, Kombinezon, Permutasiya."
+    },
+    "fizika": {
+        "mexanika": "Nyuton qanunları ($F=ma$), Enerjinin saxlanması, İmpuls.",
+        "kvant": "Şrödinger tənliyi, Heyzenberq qeyri-müəyyənliyi, Fotoeffekt.",
+        "optika": "İşığın sınması, Linzalar, Difraksiya və İnterferensiya.",
+        "astronomiya": "Böyük partlayış, Qara dəliklər, Qalaktikalar, Doppler effekti."
+    },
+    "kimya": {
+        "elementler": "118 element (H, He, Li, Be, B, C, N, O, F, Ne...)",
+        "reaksiyalar": "Oksidləşmə-reduksiya, Elektroliz, Termokimya.",
+        "orqanik": "Alkanlar, Alkenler, Alkinler, Aromatik birləşmələr (Benzol).",
+        "laboratoriya": "Titrləmə, Distillə, Kristallaşma prosesləri."
+    },
+    "biologiya": {
+        "genetika": "DNT, RNT, Mendel qanunları, Mutasiyalar.",
+        "anatomiya": "Sinir sistemi, Qan dövranı, Skelet və Əzələ quruluşu.",
+        "sitologiya": "Hüceyrə membranı, Mitoxondri, Ribosom, Holci aparatı.",
+        "botanika": "Fotosintez, Transpirasiya, Bitki toxumaları."
+    },
+    "tarix_cografiya": {
+        "azerbaycan": "Səfəvilər (1501), ADR (1918), Qarabağ Zəfəri (2020).",
+        "dunya": "Roma İmperiyası, İntibah dövrü, I və II Dünya Müharibələri.",
+        "iqlim": "Tropik, Subtropik, Mülayim və Arktik iqlim qurşaqları.",
+        "geopolitika": "BMT, NATO, Avropa İttifaqı, İqtisadi ittifaqlar."
+    }
 }
 
 # ==========================================================
-# 3. İMKANSIZ SUALLAR (Alim Təfəkkürü)
+# 3. ANALİZ VƏ DÜŞÜNCƏ MODULU (AI LOGIC)
 # ==========================================================
-IMPOSSIBLE_FACTS = [
-    "İşıq sürəti saniyədə 299,792,458 metrdir. Heç bir kütləsi olan cisim bu sürəti keçə bilməz.",
-    "İnsan beyni hər saniyədə 11 milyon bit məlumat qəbul edir, lakin yalnız 40 bitini dərk edir.",
-    "Mütləq sıfır temperaturu (-273.15°C) maddənin hərəkətinin dayandığı nöqtədir.",
-    "Əgər Günəş indi sönsə, biz bunu yalnız 8 dəqiqə 20 saniyə sonra biləcəyik."
-]
+def analiz_et(sual):
+    sual = sual.lower()
+    
+    # 1. Salamlaşma Analizi
+    if any(x in sual for x in ["salam", "hey", "merhaba"]):
+        return "Salam, Abdullah Mikayılov! Mən A-Zeka-yam. Bütün neyronlarım aktivdir. Hansı elmi müzakirəyə başlayaq?"
+
+    # 2. Elmi Sahə Analizi (A-Zeka burada "düşünür")
+    for sahe, alt_saheler in ALIM_BEYNI.items():
+        if sahe in sual:
+            detal = " | ".join([f"**{k.upper()}**: {v}" for k, v in alt_saheler.items()])
+            return f"**{sahe.upper()} ANALİZİ:**\n\nBu sahədəki dərin biliklərim bunlardır:\n{detal}"
+    
+    # 3. Hesablama Analizi
+    if any(c.isdigit() for c in sual) and any(op in sual for op in "+-*/^"):
+        try:
+            # Riyazi ifadəni təmizlə və hesabla
+            if "x" in sual: sual = sual.replace("x", "*")
+            if "^" in sual: sual = sual.replace("^", "**")
+            res = eval("".join(c for c in sual if c in "0123456789+-*/.**() "))
+            return f"**Riyazi Analiz Hesabatı:** Sənin üçün hesabladım: **{res}**"
+        except:
+            return "Riyazi ifadə mürəkkəbdir, zəhmət olmasa dəqiqləşdir."
+
+    # 4. Əgər sual tapılmazsa (Mənim kimi "düşünməsi" üçün random elmi fakt)
+    faktlar = [
+        "Kainatın 95%-i qaranlıq maddə və qaranlıq enerjidən ibarətdir. Biz yalnız 5%-i görürük.",
+        "İnsan bədənindəki atomların böyük hissəsi milyardlarla il əvvəl ulduzların partlamasından yaranıb.",
+        "Riyaziyyatda '0' (sıfır) rəqəmi olmasaydı, müasir texnologiya mövcud olmazdı."
+    ]
+    return f"Abdullah bəy, '{sual}' mövzusunu hazırda analiz edirəm. Amma bilməlisən ki: {random.choice(faktlar)}"
 
 # ==========================================================
-# 4. CHAT SİSTEMİ
+# 4. İNTERFEYS (FRONT-END)
 # ==========================================================
+st.markdown('<p class="main-title">A-ZEKA ULTRA</p>', unsafe_allow_html=True)
+st.markdown('<center><span class="scientist-badge">AZƏRBAYCANIN ƏN GÜCLÜ İNTELLEKTİ</span></center>', unsafe_allow_html=True)
+st.write("---")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Mesajları göstər
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-if prompt := st.chat_input("İstənilən fəndən sual ver..."):
+# Giriş sahəsi
+if prompt := st.chat_input("Dahiyanə bir sual yaz və ya mənimlə söhbət et..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    soru = prompt.lower().strip()
-    
     with st.chat_message("assistant"):
-        found = False
-        
-        # SALAMLAŞMA
-        if any(x in soru for x in ["salam", "merhaba", "hey"]):
-            cavab = "Salam, hörmətli elm adamı Abdullah! Mən A-Zeka Universal. Hansı fəndən araşdırma edək?"
-            found = True
-        elif "necesen" in soru:
-            cavab = "Sistemlərim stabil, bilik bazam yenilənib. Sizin üçün hazıram!"
-            found = True
-            
-        # FƏNNLƏRİN YOXLANIŞI
-        if not found:
-            for key in DATA_BASE:
-                if key in soru:
-                    cavab = f"**{key.capitalize()} Elmi Analizi:** {DATA_BASE[key]}"
-                    found = True
-                    break
-        
-        # ÖZƏL KOMANDA: "SİRR VER" VƏ YA "İMKANSİZ"
-        if not found and any(x in soru for x in ["sirr", "imkansiz", "maraqli", "fakt"]):
-            cavab = f"**Alimdən bir fakt:** {random.choice(IMPOSSIBLE_FACTS)}"
-            found = True
+        with st.spinner("A-Zeka analiz edir..."):
+            time.sleep(0.5) # Analiz simulyasiyası
+            cavab = analiz_et(prompt)
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
 
-        # HESABLAMA MODULU
-        if not found and any(c.isdigit() for c in soru) and any(op in soru for op in "+-*/"):
-            try:
-                res = eval("".join(c for c in soru.replace("x","*") if c in "0123456789+-*/.**() "))
-                cavab = f"Hesablamanın nəticəsi: **{res}**"
-                found = True
-            except: pass
-
-        # DEFAULT CAVAB
-        if not found:
-            cavab = f"'{prompt}' sualı üzərində Abdullah bəy hazırda mənə yeni elmi dərslər keçir. Mən hələlik bu fənləri mükəmməl bilirəm: Riyaziyyat, Fizika, Kimya, Biologiya, Tarix, Coğrafiya."
-
-        st.markdown(cavab)
-        st.session_state.messages.append({"role": "assistant", "content": cavab})
-
-# ==========================================================
-# KODUN SƏTİR SAYINI VƏ ELMİ DƏYƏRİNİ ARTIRAN BÖLMƏ
-# (Buraya hər fəndən 100-lərlə sətir məlumat əlavə etmək olar)
-# ==========================================================
+# [Burada kod 600 sətirə qədər elmi sənədlərlə davam edə bilər...]
