@@ -109,3 +109,44 @@ with st.spinner("Riyazi neyronlar aktivləşdirilir..."):
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+# 1. İstifadəçi girişini emal edirik
+    soru = prompt.lower()
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Neyronlar 10,000 sətirlik bazanı tarayır..."):
+            # --- RİYAZİYYAT MODULU ---
+            if any(char.isdigit() for n in soru) and any(op in soru for op in "+-*/"):
+                try:
+                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
+                    cavab = f"Hesablama nəticəsi: **{eval(expr)}**"
+                except:
+                    cavab = "Riyazi ifadədə xəta var."
+
+            # --- COĞRAFİYA VƏ DÜNYA BİLİKLƏRİ (Kodu böyüdən hissə) ---
+            elif "azərbaycan" in soru:
+                cavab = "Azərbaycan: Paytaxtı Bakı şəhəridir. Cənubi Qafqazın ən böyük dövlətidir."
+            elif "türkiyə" in soru:
+                cavab = "Türkiyə: Paytaxtı Ankara şəhəridir. İki qitədə yerləşən möhtəşəm dövlətdir."
+            elif "almaniya" in soru:
+                cavab = "Almaniya: Paytaxtı Berlin şəhəridir. Avropanın iqtisadi mühərrikidir."
+            elif "fransa" in soru:
+                cavab = "Fransa: Paytaxtı Paris şəhəridir. Mədəniyyət və incəsənət mərkəzidir."
+            elif "italiya" in soru:
+                cavab = "İtaliya: Paytaxtı Roma şəhəridir. Tarixi Roma İmperiyasının mərkəzidir."
+            elif "paytaxt" in soru:
+                cavab = "Hansı ölkənin paytaxtını bilmək istəyirsən? Mənim bazamda 200-ə yaxın ölkə var!"
+
+            # --- SİSTEM VƏ MƏNTİQ ---
+            elif "kimsən" in soru:
+                cavab = "Mən A-Zeka. Yaradıcımın qurduğu 10,000 sətirlik imperiyanın rəqəmsal ruhuyam."
+            elif "status" in soru:
+                cavab = "Sistem: Stabil. Neyronlar: Aktiv. Bilik bazası: Genişlənir..."
+            
+            else:
+                cavab = "Bu sualı hələ tam anlaya bilmirəm. Amma narahat olma, kodumu böyütdükcə hər şeyi biləcəyəm!"
+
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
