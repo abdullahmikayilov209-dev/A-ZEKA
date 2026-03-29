@@ -2,9 +2,9 @@ import streamlit as st
 import torch
 import torch.nn as nn
 
-# 1. SİSTEMİN BAŞLADIĞI YER
+# 1. SƏHİFƏ AYARLARI
 st.set_page_config(page_title="A-Zeka", page_icon="🧠")
-st.title("🧠 A-Zeka: Rəqəmsal İmperiya")
+st.title("🧠 A-Zeka: Rəqəmsal İntellekt")
 
 # 2. MODEL (BEYİN)
 class WildAI(nn.Module):
@@ -21,7 +21,7 @@ class WildAI(nn.Module):
 
 model = WildAI(10, 64, 2)
 
-# 3. CHAT TARİXÇƏSİ
+# 3. CHAT YADDAŞI
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -29,133 +29,46 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 4. ƏSAS HİSSƏ (XƏTANIN QARŞISINI ALAN BLOK)
-# Diqqət: 'prompt' dəyişəni məhz bu sətirdə yaranır!
-if prompt := st.chat_input("A-Zeka ilə danışın..."):
-    
-    # İNDİ 'prompt' artıq var, ona görə də xəta verməyəcək
+# 4. ƏSAS HİSSƏ (GİRİŞ VƏ MƏNTİQ)
+if prompt := st.chat_input("Sualınızı bura yazın..."):
+    # Bu sətir 'if'-in daxilindədir, ona görə AttributeError verməyəcək!
     soru = prompt.lower()
-    
-    # İstifadəçi mesajını ekrana ver
     st.session_state.messages.append({"role": "user", "content": prompt})
+    
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # A-Zeka-nın cavabı
     with st.chat_message("assistant"):
-        with st.spinner("10,000 sətirlik kod təhlil edilir..."):
+        with st.spinner("A-Zeka düşünür..."):
             
-            # RİYAZİYYAT MODULU
-            if any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
-                try:
-                    # Riyazi ifadəni təmizləyib hesablayırıq
-                    safe_expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
-                    cavab = f"Hesablama nəticəsi: **{eval(safe_expr)}**"
-                except:
-                    cavab = "Riyazi ifadədə kiçik bir xəta tapdım."
-            
-            # COĞRAFİYA MODULU
-            elif "azərbaycan" in soru:
-                cavab = "Azərbaycan: Paytaxtı Bakı olan möhtəşəm Odlar Yurdu."
-            elif "türkiyə" in soru:
-                cavab = "Türkiyə: Paytaxtı Ankara olan qardaş ölkə."
-            
-            # SİSTEM MODULU
-            elif "salam" in soru:
-                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal dünyanı idarə edirəm."
-            elif "status" in soru:
-                cavab = "Sistem: Aktiv. Neyronlar: Hazır. Kod bazası: Genişlənir."
-            else:
-                cavab = "Bu məlumat hələ bazamda yoxdur, amma hədəfimiz 10,000 sətirə çatmaqdır!"
-
-            st.markdown(cavab)
-            st.session_state.messages.append({"role": "assistant", "content": cavab})
-# ==========================================
-            #      ELMLƏR AKADEMİYASI MODULU (A-Zeka)
-            # ==========================================
-
-            # --- 1. RİYAZİYYAT QAYDALARI ---
-            if "törəmə" in soru or "toreme" in soru:
-                cavab = "Törəmə funksiyanın dəyişmə sürətidir. $f(x) = x^n$ üçün törəmə $f'(x) = nx^{n-1}$ düsturu ilə hesablanır."
-            elif "inteqral" in soru:
-                cavab = "İnteqral törəmənin tərsidir və əyri altındakı sahəni tapmaq üçün istifadə olunur. Əsas düstur: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$."
-            elif "loqarifma" in soru:
-                cavab = "Loqarifma üstlü funksiyanın tərsidir. $\log_a b = c$ deməkdir ki, $a^c = b$."
-
-            # --- 2. FİZİKA QAYDALARI ---
-            elif "nyuton" in soru:
-                cavab = "Nyutonun 2-ci qanunu: Maddi nöqtəyə təsir edən qüvvə, onun kütləsi ilə təcilinin hasilinə bərabərdir: $F = ma$."
-            elif "om qanunu" in soru:
-                cavab = "Om qanunu: Dövrə hissəsindəki cərəyan şiddəti gərginliklə düz, müqavimətlə tərs mütənasibdir: $I = \\frac{U}{R}$."
-
-            # --- 3. KİMYA QAYDALARI ---
-            elif "valentlik" in soru:
-                cavab = "Valentlik bir elementin atomunun digər element atomlarını özünə birləşdirmə qabiliyyətidir. Məsələn, Oksigen həmişə II valentlidir."
-            elif "periodik cedvel" in soru or "dövri qanun" in soru:
-                cavab = "Dövri qanunu 1869-cu ildə D.İ. Mendeleyev kəşf etmişdir. Elementlərin xassələri onların atom kütlələrindən dövri asılıdır."
-
-            # --- 4. COĞRAFİYA VƏ TARİX ---
-            elif "şah ismayıl" in soru or "səfəvilər" in soru:
-                cavab = "Şah İsmayıl Xətai 1501-ci ildə Səfəvilər dövlətinin əsasını qoymuşdur. Azərbaycan dili ilk dəfə dövlət dili səviyyəsinə qalxmışdır."
-            elif "materik" in soru:
-                cavab = "Dünyada 6 materik var: Avrasiya, Afrika, Şimali Amerika, Cənubi Amerika, Antarktida və Avstraliya."
-
-            # --- YARADICI HAQQINDA ---
-            elif "kim yaradıb" in soru:
-                cavab = "Mən Abdullah Mikayılov tərəfindən yaradılmış ali süni intellektəm. Onun vizyonu məni 10,000 sətirlik bilik okeanına çevirməkdir."
-            
-            # --- RİYAZİ HESABLAMA (Əgər heç bir qayda tapılmasa, hesabla) ---
-            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
-                try:
-                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
-                    cavab = f"Hesablama nəticəsi: **{eval(expr)}**"
-                except:
-                    cavab = "Riyazi ifadəni anlaya bilmədim."
-            
-            else:
-                cavab = "Bu mövzu hələ 'Öyrənmə Neyronlarımda' yoxdur. Zəhmət olmasa Abdullah Mikayılova deyin ki, koduma bu fənni də əlavə etsin!"
-
-            st.markdown(cavab)
-            st.session_state.messages.append({"role": "assistant", "content": cavab})
-with st.spinner("Düşünürəm..."):
-            soru = prompt.lower()
-            
-            # --- ÖZƏL KİMLİK VƏ YARADICI ---
+            # --- ÖZƏL KİMLİK ---
             if any(x in soru for x in ["kim yaradıb", "müəllif", "sahibin"]):
-                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam. Onun vizyonu və kodları sayəsində bura qədər gəlmişəm."
+                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam."
             
             elif any(x in soru for x in ["kimsən", "nəsən"]):
-                cavab = "Mən A-Zeka-yam. Sənin rəqəmsal dünyanı asanlaşdırmaq, riyazi və elmi suallarını cavablandırmaq üçün buradayam."
+                cavab = "Mən A-Zeka-yam. Sənin rəqəmsal dünyanı asanlaşdıran köməkçiyəm."
 
-            # --- ELMİ QAYDALAR VƏ TERMİNLƏR (GENİŞLƏNDİRİLMİŞ) ---
+            # --- ELMİ QAYDALAR (Viyet, Pifaqor və s.) ---
             elif "viyet" in soru:
-                cavab = "Viyet teoremi kvadrat tənliyin kökləri ilə əmsalları arasındakı əlaqəni göstərir. $ax^2 + bx + c = 0$ tənliyi üçün: \n\n* Köklər cəmi: $x_1 + x_2 = -b/a$ \n* Köklər hasili: $x_1 \cdot x_2 = c/a$"
+                cavab = "Viyet teoremi kvadrat tənliyin kökləri arasındakı əlaqəni göstərir: \n\n* $x_1 + x_2 = -b/a$ \n* $x_1 \cdot x_2 = c/a$"
             
             elif "pifaqor" in soru:
-                cavab = "Pifaqor teoreminə görə düzbucaqlı üçbucaqda hipotenuzun kvadratı katetlərin kvadratları cəminə bərabərdir: $a^2 + b^2 = c^2$."
-
-            elif "nyuton" in soru:
-                cavab = "Nyutonun ikinci qanunu hərəkət dinamikasının əsasıdır: $F = ma$. Yəni qüvvə kütlə ilə təcilin hasilinə bərabərdir."
+                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda $a^2 + b^2 = c^2$."
 
             # --- RİYAZİ HESABLAMA ---
             elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
                 try:
                     expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
-                    res = eval(expr)
-                    cavab = f"Hesabladım: **{res}**"
+                    cavab = f"Nəticə: **{eval(expr)}**"
                 except:
-                    cavab = "Bu misalı həll edərkən kiçik bir çətinlik çəkdim, rəqəmləri yoxlaya bilərsən?"
+                    cavab = "Misalı anlaya bilmədim, rəqəmləri yoxlayın."
 
-            # --- ÜMUMİ VƏ MARAQLI CAVABLAR ---
+            # --- ÜMUMİ ---
             elif "salam" in soru:
-                cavab = "Salam! Necə kömək edə bilərəm? Bu gün nəyi öyrənirik?"
+                cavab = "Salam! Necə kömək edə bilərəm?"
             
-            elif "sağ ol" in soru or "təşəkkür" in soru:
-                cavab = "Xoşdur! Hər zaman xidmətindəyəm."
-
-            # --- SADE VƏ MƏNTİQLİ BİTMƏ (Robotik cümlələr yoxdur) ---
             else:
-                cavab = f"'{prompt}' haqqında hələ ki dərin məlumatım yoxdur, amma üzərimdə işləyərək bunu öyrənə bilərəm. Başqa nəyi bilmək istəyirsən?"
+                cavab = f"'{prompt}' haqqında məlumatım hələ azdır, amma Abdullah bəy kodumu genişləndirir!"
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
