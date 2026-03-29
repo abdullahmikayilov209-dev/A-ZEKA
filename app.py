@@ -13,37 +13,43 @@ client = Groq(api_key=api_key)
 st.set_page_config(page_title="Zəka AI", page_icon="🇦🇿")
 st.title("🇦🇿 Milli Süni İntellekt")
 
+# Yaddaş tənzimləməsi
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {
-            "role": "system", 
-            "content": """Sən Zəka AI-san. Səmimi və ağıllı köməkçisən.
-            Riyazi ifadələri və kəsrləri izah edərkən onları kod bloku içində (```) göstər ki, oxunması rahat olsun.
-            Həmişə Azərbaycan dilində cavab ver."""
-        }
-    ]
+    st.session_state.messages = []
 
-# Mesajları göstərərkən xüsusi tənzimləmə
+# Mesajları göstərərkən səninkini "SADƏ MƏTN", AI-nınkını "MARKDOWN" kimi göstəririk
 for message in st.session_state.messages:
-    if message["role"] != "system":
-        with st.chat_message(message["role"]):
-            # Əgər mətndə çoxlu riyazi simvol varsa, onu qarışdırmadan göstər
-            st.write(message["content"])
+    with st.chat_message(message["role"]):
+        if message["role"] == "user":
+            # Sənin yazdığın o uzun kəsrlər burada xarab olmayacaq:
+            st.text(message["content"])
+        else:
+            # AI-nın cavabı normal qaydada (markdown) görünəcək
+            st.markdown(message["content"])
 
-if prompt := st.chat_input("Sualınızı bura yazın..."):
+# Giriş hissəsi
+if prompt := st.chat_input("Sualınızı və ya misalı bura yazın..."):
+    # İstifadəçi mesajını yaddaşa əlavə et
     st.session_state.messages.append({"role": "user", "content": prompt})
+    
     with st.chat_message("user"):
-        # Sənin yazdığın o uzun kəsri olduğu kimi göstərmək üçün st.text istifadə edirik
-        st.text(prompt) 
+        # Sənin yazdığını ekranda "sadə mətn" kimi göstəririk ki, dağılmasın
+        st.text(prompt)
 
     with st.chat_message("assistant"):
         try:
+            # Sistem təlimatını buraya əlavə edirik ki, hər dəfə oxusun
+            full_messages = [
+                {"role": "system", "content": "Sən Zəka AI-san. Səmimi ol və riyazi misalları addım-addım Azərbaycan dilində izah et."}
+            ] + st.session_state.messages
+
             chat_completion = client.chat.completions.create(
-                messages=st.session_state.messages,
+                messages=full_messages,
                 model="llama-3.3-70b-versatile",
-                temperature=0.2, # Maksimum dəqiqlik
+                temperature=0.2,
             )
             response = chat_completion.choices[0].message.content
+            
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
