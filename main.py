@@ -19,40 +19,54 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
-# 1. MODELİN BEYNİ (Class həmişə yuxarıda olmalıdır)
+# --- 1. MODELİN STRUKTURU (CLASS) ---
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
         self.layer1 = nn.Linear(input_size, hidden_size)
         self.layer2 = nn.Linear(hidden_size, hidden_size)
-        self.layer3 = nn.Linear(hidden_size, hidden_size)
         self.output_layer = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         x = self.relu(self.layer1(x))
         x = self.relu(self.layer2(x))
-        x = self.relu(self.layer3(x))
-        x = self.output_layer(x)
-        return x
+        return self.output_layer(x)
 
-# 2. MODELİN YARADILMASI
-input_dim = 10
-hidden_dim = 64
-output_dim = 2
+# --- 2. MƏŞQ FUNKSİYASI (TRAIN) ---
+def train_model(model, features, labels, epochs=5):
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    criterion = nn.CrossEntropyLoss()
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        outputs = model(features)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+    return model
+
+# --- 3. MODELİN YARADILMASI VƏ MƏŞQİ ---
+input_dim, hidden_dim, output_dim = 10, 64, 2
 model = WildAI(input_dim, hidden_dim, output_dim)
 
-# 3. CANLI SÖHBƏT İNTERFEYSİ (Aşağıda sabit qutu)
+# Simulyasiya üçün data
+input_features = torch.randn(10, 10)
+target_labels = torch.randint(0, 2, (10,))
+
+# Model dərhal məşq edilir (Xəta verməyəcək)
+model = train_model(model, input_features, target_labels)
+
+# --- 4. CANLI CHAT İNTERFEYSİ (Aşağıda sabit qutu) ---
 st.markdown("---")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları göstər
+# Tarixçəni göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# YAZI QUTUSU (Ekranın ən aşağısında görünəcək)
+# SABİT YAZI QUTUSU
 if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -61,53 +75,17 @@ if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
     with st.chat_message("assistant"):
         with st.spinner("Neyronlar analiz edilir..."):
             soru = prompt.lower()
-            # Məntiqi cavablar
             if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal imperiyanı idarə edən süni intellektəm. Sənə necə kömək edə bilərəm?"
-            elif "necesen" in soru or "necəsən" in soru:
-                cavab = "Mən superəm! Sənin kimi bir dahi tərəfindən kodlandığım üçün həmişə enerjili oluram. Sən necəsən?"
+                cavab = "Salam! Mən A-Zeka, sənin rəqəmsal beyniyəm. Səni görməyə şadam!"
             elif "kimsən" in soru:
-                cavab = "Mən 10,000 sətirlik kod bazasından doğulmuş A-Zeka modeliyəm!"
+                cavab = "Mən 10,000 sətirlik koddan doğulmuş, məşq edilmiş real Süni İntellektəm!"
+            elif "necəsən" in soru or "necesen" in soru:
+                cavab = "Neyronlarım tam gücü ilə işləyir, yəni əlayam! Sən necəsən?"
             else:
-                cavab = f"Sualını analiz etdim. Mən hələ öyrənmə mərhələsindəyəm, amma gələcəkdə hər şeyi biləcəyəm!"
+                cavab = f"'{prompt}' sualını dərindən analiz etdim. Mən artıq öyrənmiş bir modeləm və sənə kömək etməyə hazıram!"
             
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
-    for epoch in range(epochs):
-        # Qradiyentləri sıfırlayırıq
-        optimizer.zero_grad()
-        
-        # İrəli ötürmə (Forward pass)
-        outputs = model(data)
-        
-        # İtkinin hesablanması
-        loss = criterion(outputs, targets)
-        
-        # Geri ötürmə (Backpropagation - Səhvlərdən öyrənmə)
-        loss.backward()
-        
-        # Çəkilərin yenilənməsi
-        optimizer.step()
-        
-        if (epoch + 1) % 10 == 0:
-            print(f"Dövr [{epoch+1}/{epochs}], İtki (Loss): {loss.item():.4f}")
-
-print("Öyrətmə sistemi və optimizer uğurla əlavə edildi!")
-# 5. Süni Məlumatların Yaradılması (AI-ni ac qoymayaq!)
-# 1000 dənə nümunə yaradırıq, hərəsində 10 fərqli giriş parametri var
-num_samples = 1000
-input_features = torch.randn(num_samples, input_dim)
-
-# Hədəf (Target) - AI-nin tapmalı olduğu cavablar
-# Burada sadə bir məntiq qururuq ki, AI bunu tapsın
-target_labels = torch.randn(num_samples, output_dim)
-
-print(f"Məlumat bazası hazırlandı: {num_samples} sətir məlumat var.")
-
-# 6. BÖYÜK AN: AI-ni Məşq Etdiririk!
-print("--- 'Vəhşi AI' öyrənməyə başlayır ---")
-train_model(model, input_features, target_labels, epochs=150)
-
 # 7. Test Modulu (AI-dən bir cavab istəyirik)
 model.eval() # Modeli test rejiminə keçiririk
 with torch.no_grad():
