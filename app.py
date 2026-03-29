@@ -25,8 +25,6 @@ if "messages" not in st.session_state:
             Yalnız sual soruşulanda dərin məlumat ver. Həmişə Azərbaycan dilində danış."""
         }
     ]
-        }
-    ]
 
 # Mesajları göstər (Sistem mesajı xaric)
 for message in st.session_state.messages:
