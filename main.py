@@ -38,46 +38,61 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 # 40-cı sətirdən (if prompt... altından) başlayaraq hər şeyi sil və bunu yapışdır:
+   # İstifadəçi sualını yaddaşa əlavə edirik (Amma burada dərhal ekrana çap etmirik ki, təkrarlanmasın)
     soru = prompt.lower()
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    # Səhifəni yeniləyirik ki, mesajlar qaydasında görünsün
+    st.rerun()
 
+# Mesajları göstərən hissə (Bu blok if prompt-un çölündə, yuxarıda olmalıdır)
+# Əgər yuxarıda artıq varsa, aşağıdakı if-in daxili məntiqinə diqqət yetir:
+
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     with st.chat_message("assistant"):
-        with st.spinner("A-Zeka neyronları skan edir..."):
+        with st.spinner("A-Zeka riyazi neyronları işə salır..."):
+            son_sual = st.session_state.messages[-1]["content"].lower()
             
-            # --- SOSİAL ---
-            if any(x in soru for x in ["salam", "sağ ol", "təşəkkür"]):
-                cavab = "Salam! Mən A-Zeka. Abdullah Mikayılov tərəfindən yaradılmışam. Necə kömək edim?"
+            # --- RİYAZİYYATIN QIZIL QAYDALARI (Sətir sayını artıran hissə) ---
+            if "viyet" in son_sual:
+                cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində $x_1+x_2 = -b/a$ və $x_1 \cdot x_2 = c/a$ olur."
             
-            elif any(x in soru for x in ["necesen", "nətərsən"]):
-                cavab = "Mən rəqəmsal zəkayam, hər zaman işləməyə hazıram! Bəs sən necəsən?"
+            elif "heron" in son_sual:
+                cavab = "Heron düsturu: $S = \\sqrt{p(p-a)(p-b)(p-c)}$. Burada $p$ yarımperimetrdir."
+            
+            elif "pifaqor" in son_sual:
+                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda $a^2 + b^2 = c^2$."
+            
+            elif "diskriminant" in son_sual:
+                cavab = "Kvadrat tənliyin həlli: $D = b^2 - 4ac$."
+            
+            elif "törəmə" in son_sual or "toreme" in son_sual:
+                cavab = "Törəmə qaydası: $(x^n)' = nx^{n-1}$."
+            
+            elif "inteqral" in son_sual:
+                cavab = "İnteqral qaydası: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$."
+                
+            elif "loqarifma" in son_sual:
+                cavab = "Loqarifma: $\log_a b = c \implies a^c = b$."
 
-            # --- ELMİ QAYDALAR (1-11-ci Sinif) ---
-            elif "viyet" in soru:
-                cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində köklər cəmi $x_1+x_2 = -b/a$, köklər hasili $x_1 \\cdot x_2 = c/a$ olur."
-            
-            elif "heron" in soru:
-                cavab = "Heron düsturu: Üçbucağın tərəfləri $a, b, c$ olduqda, sahə $S = \\sqrt{p(p-a)(p-b)(p-c)}$ (burada $p$ yarımperimetrdir)."
-            
-            elif "pifaqor" in soru:
-                cavab = "Pifaqor teoremi: $a^2 + b^2 = c^2$. Hipotenuzun kvadratı katetlərin kvadratları cəminə bərabərdir."
-
-            # --- RİYAZİ HESABLAMA ---
-            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/^"):
+            # --- RİYAZİ HESABLAYICI MODUL ---
+            elif any(char.isdigit() for char in son_sual) and any(op in son_sual for op in "+-*/^"):
                 try:
-                    calc = soru.replace("x", "*").replace("^", "**").replace(":", "/")
-                    safe_expr = "".join(c for c in calc if c in "0123456789+-*/.**() ")
-                    import math
-                    res = eval(safe_expr)
-                    cavab = f"Sənin üçün hesabladım: **{res}**"
+                    hesab = son_sual.replace("x", "*").replace("^", "**").replace(":", "/")
+                    təmiz_hesab = "".join(c for c in hesab if c in "0123456789+-*/.**() ")
+                    cavab = f"Hesablamanın nəticəsi: **{eval(təmiz_hesab)}**"
                 except:
-                    cavab = "Riyazi ifadədə texniki xəta var, rəqəmləri yoxla."
+                    cavab = "Təəssüf ki, bu mürəkkəb misalı həll edə bilmədim. Rəqəmləri yoxlayın."
 
-            # --- DEFAULT CAVAB ---
+            # --- DİGƏR CAVABLAR ---
+            elif "necesen" in son_sual:
+                cavab = "Mən rəqəmsal zəkayam, Abdullah bəy mənə yeni qaydalar öyrətdikcə daha yaxşı oluram!"
+            
+            elif "salam" in son_sual:
+                cavab = "Salam! Mən A-Zeka. Hansı elmi mövzunu araşdırırıq?"
+
             else:
-                cavab = f"'{prompt}' sualı haqqında məlumatım hələ azdır, amma mən sürətlə inkişaf edirəm!"
+                cavab = "Bu mövzunu hələ mükəmməl bilmirəm, amma 1-11-ci sinif proqramını öyrənməyə davam edirəm!"
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
