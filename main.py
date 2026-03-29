@@ -19,39 +19,16 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
-# --- CANLI SÖHBƏT SİSTEMİ (Mənim kimi aşağıda) ---
-st.markdown("---")
+# 1. MODELİN BEYNİ (Class həmişə yuxarıda olmalıdır)
+class WildAI(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(WildAI, self).__init__()
+        self.layer1 = nn.Linear(input_size, hidden_size)
+        self.layer2 = nn.Linear(hidden_size, hidden_size)
+        self.layer3 = nn.Linear(hidden_size, hidden_size)
+        self.output_layer = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Mesajları ekranda göstər
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# ƏN AŞAĞIDAKI SUAL QUTUSU (Dizaynı ChatGPT/Gemini kimi edir)
-if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        with st.spinner("Analiz edilir..."):
-            soru = prompt.lower()
-            
-            # Ağıllı cavablar sistemi
-            if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal imperiyanı idarə edən süni intellektəm."
-            elif "kimsən" in soru:
-                cavab = "Mən 10,000 sətirlik koddan doğulmuş, sənin üçün özəlləşdirilmiş AI modeliyəm."
-            elif "necəsən" in soru or "necesen" in soru:
-                cavab = "Mən həmişə hazıram! Sən necəsən, yaradıcım?"
-            else:
-                cavab = f"Sualını analiz etdim. Mən hələ öyrənirəm, amma mənə bir az vaxt versən, bu barədə dahi olacağam!"
-            
-            st.markdown(cavab)
-            st.session_state.messages.append({"role": "assistant", "content": cavab})
     def forward(self, x):
         x = self.relu(self.layer1(x))
         x = self.relu(self.layer2(x))
@@ -59,26 +36,43 @@ if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
         x = self.output_layer(x)
         return x
 
-print("AI-nin təməl strukturu hazırdır!")
-# 1. Parametrlərin təyin edilməsi
-# Giriş 10 (məsələn 10 fərqli göstərici), Gizli qat 64 neyron, Çıxış 2 (məsələn 'Hə/Yox')
+# 2. MODELİN YARADILMASI
 input_dim = 10
 hidden_dim = 64
 output_dim = 2
-
-# Modelimizi işə salırıq
 model = WildAI(input_dim, hidden_dim, output_dim)
 
-# 2. İtki funksiyası (Səhvləri ölçmək üçün)
-criterion = nn.MSELoss() 
+# 3. CANLI SÖHBƏT İNTERFEYSİ (Aşağıda sabit qutu)
+st.markdown("---")
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# 3. Optimallaşdırıcı (Səhvləri düzəltmək üçün "vəhşi" sürətli Adam optimizer)
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+# Mesajları göstər
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# 4. Nümunə bir öyrətmə funksiyası (Bu hissə AI-ni məşq etdirir)
-def train_model(model, data, targets, epochs=100):
-    model.train() # Modeli öyrətmə rejiminə keçiririk
-    
+# YAZI QUTUSU (Ekranın ən aşağısında görünəcək)
+if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Neyronlar analiz edilir..."):
+            soru = prompt.lower()
+            # Məntiqi cavablar
+            if "salam" in soru:
+                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal imperiyanı idarə edən süni intellektəm. Sənə necə kömək edə bilərəm?"
+            elif "necesen" in soru or "necəsən" in soru:
+                cavab = "Mən superəm! Sənin kimi bir dahi tərəfindən kodlandığım üçün həmişə enerjili oluram. Sən necəsən?"
+            elif "kimsən" in soru:
+                cavab = "Mən 10,000 sətirlik kod bazasından doğulmuş A-Zeka modeliyəm!"
+            else:
+                cavab = f"Sualını analiz etdim. Mən hələ öyrənmə mərhələsindəyəm, amma gələcəkdə hər şeyi biləcəyəm!"
+            
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
     for epoch in range(epochs):
         # Qradiyentləri sıfırlayırıq
         optimizer.zero_grad()
