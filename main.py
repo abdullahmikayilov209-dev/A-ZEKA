@@ -110,61 +110,17 @@ with st.spinner("Riyazi neyronlar aktivləşdirilir..."):
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
 # 1. İstifadəçi girişini emal edirik
-   if prompt := st.chat_input("Yazın..."):
-    soru = prompt.lower() # DÜZ! Çünki if-dən 4 boşluq sağdadır.
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+ # 112-ci sətirdən başlayaraq hər şeyi sil və bunu ən sola bitişik yapışdır:
 
-    with st.chat_message("assistant"):
-        with st.spinner("Neyronlar 10,000 sətirlik bazanı tarayır..."):
-            # --- RİYAZİYYAT MODULU ---
-            if any(char.isdigit() for n in soru) and any(op in soru for op in "+-*/"):
-                try:
-                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
-                    cavab = f"Hesablama nəticəsi: **{eval(expr)}**"
-                except:
-                    cavab = "Riyazi ifadədə xəta var."
-
-            # --- COĞRAFİYA VƏ DÜNYA BİLİKLƏRİ (Kodu böyüdən hissə) ---
-            elif "azərbaycan" in soru:
-                cavab = "Azərbaycan: Paytaxtı Bakı şəhəridir. Cənubi Qafqazın ən böyük dövlətidir."
-            elif "türkiyə" in soru:
-                cavab = "Türkiyə: Paytaxtı Ankara şəhəridir. İki qitədə yerləşən möhtəşəm dövlətdir."
-            elif "almaniya" in soru:
-                cavab = "Almaniya: Paytaxtı Berlin şəhəridir. Avropanın iqtisadi mühərrikidir."
-            elif "fransa" in soru:
-                cavab = "Fransa: Paytaxtı Paris şəhəridir. Mədəniyyət və incəsənət mərkəzidir."
-            elif "italiya" in soru:
-                cavab = "İtaliya: Paytaxtı Roma şəhəridir. Tarixi Roma İmperiyasının mərkəzidir."
-            elif "paytaxt" in soru:
-                cavab = "Hansı ölkənin paytaxtını bilmək istəyirsən? Mənim bazamda 200-ə yaxın ölkə var!"
-
-            # --- SİSTEM VƏ MƏNTİQ ---
-            elif "kimsən" in soru:
-                cavab = "Mən A-Zeka. Yaradıcımın qurduğu 10,000 sətirlik imperiyanın rəqəmsal ruhuyam."
-            elif "status" in soru:
-                cavab = "Sistem: Stabil. Neyronlar: Aktiv. Bilik bazası: Genişlənir..."
-            
-            else:
-                cavab = "Bu sualı hələ tam anlaya bilmirəm. Amma narahat olma, kodumu böyütdükcə hər şeyi biləcəyəm!"
-
-            st.markdown(cavab)
-            st.session_state.messages.append({"role": "assistant", "content": cavab})
-# ... (yuxarıda model və digər kodlar var)
-
-# 1. Mesaj tarixçəsini yaddaşda saxlamaq üçün (Əgər yuxarıda yoxdursa)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 2. Köhnə mesajları ekranda göstərmək üçün
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 3. ƏSAS HİSSƏ: Yazı qutusu və Cavab məntiqi
 if prompt := st.chat_input("Sualınızı bura yazın..."):
-    # Diqqət: Aşağıdakı bütün sətirlər if-in daxilindədir (4 boşluq sağda)
+    # Diqqət: Bu sətirlər mütləq 4 boşluq içəridə olmalıdır
     soru = prompt.lower()
     st.session_state.messages.append({"role": "user", "content": prompt})
     
@@ -173,14 +129,20 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Neyronlar analiz edir..."):
-            # Buradakı 'if/elif' blokları 'with' daxilindədir (daha 4 boşluq sağda)
-            if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka."
+            # Riyaziyyat, Coğrafiya və Məntiq Modulu
+            if any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
+                try:
+                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
+                    cavab = f"Hesablama nəticəsi: **{eval(expr)}**"
+                except:
+                    cavab = "Riyazi ifadədə xəta var."
             elif "azərbaycan" in soru:
                 cavab = "Azərbaycan: Paytaxtı Bakı şəhəridir."
-            # Bura yeni ölkələr və riyazi modullar əlavə edərək kodu 10,000 sətirə çatdıracağıq
+            elif "salam" in soru:
+                cavab = "Salam! Mən A-Zeka, sənin qurduğun rəqəmsal imperiyanın beyniyəm."
             else:
-                cavab = "Bunu hələ öyrənməmişəm, amma üzərimdə işləyirik!"
+                cavab = "Bu məlumat hələ bazamda yoxdur, amma kodumuzu böyütdükcə öyrənəcəyəm!"
             
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+           
