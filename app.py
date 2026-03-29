@@ -61,12 +61,34 @@ ALIM_BEYNI = {
 # 3. ANALİZ VƏ DÜŞÜNCƏ MODULU (AI LOGIC)
 # ==========================================================
 def analiz_et(sual):
-    sual = sual.lower()
+    sual = sual.lower().strip()
     
-    # 1. Salamlaşma Analizi
+    # 1. KİMLİK VƏ SOSİAL ANALİZ (Düzəliş bura edildi)
     if any(x in sual for x in ["salam", "hey", "merhaba"]):
-        return "Salam, Abdullah Mikayılov! Mən A-Zeka-yam. Bütün neyronlarım aktivdir. Hansı elmi müzakirəyə başlayaq?"
+        return "Salam, Abdullah Mikayılov! Bütün sistemlərim aktivdir. Hansı elmi müzakirəyə başlayaq?"
+    
+    elif "necesen" in sual or "nəsən" in sual:
+        return "Mən bir süni intellektəm, hər zaman Abdullah bəyin xidmətindəyəm! Sən necəsən?"
+    
+    elif any(x in sual for x in ["kim yaradıb", "kim yaradib", "yaradıcın", "kimsen"]):
+        return "Mən **A-Zeka**-yam. Məni Azərbaycanın gənc dahisi **Abdullah Mikayılov** yaradıb!"
 
+    # 2. ELMİ SAHƏ ANALİZİ
+    for sahe, alt_saheler in ALIM_BEYNI.items():
+        if sahe in sual:
+            detal = "\n".join([f"* **{k.upper()}**: {v}" for k, v in alt_saheler.items()])
+            return f"**{sahe.upper()} SAHƏSİ ÜZRƏ ANALİZİM:**\n\n{detal}"
+    
+    # 3. RİYAZİ HESABLAMA
+    if any(c.isdigit() for c in sual) and any(op in sual for op in "+-*/^"):
+        try:
+            temp_sual = sual.replace("x", "*").replace("^", "**")
+            res = eval("".join(c for c in temp_sual if c in "0123456789+-*/.**() "))
+            return f"**Riyazi Hesablama:** Nəticə **{res}** edir."
+        except: pass
+
+    # 4. DEFAULT
+    return f"'{sual}' mövzusunu dərindən analiz etmək üçün Abdullah bəy mənə yeni məlumatlar yükləməlidir. Mən hələlik bu fənləri mükəmməl bilirəm: Riyaziyyat, Fizika, Kimya və Tarixi."
     # 2. Elmi Sahə Analizi (A-Zeka burada "düşünür")
     for sahe, alt_saheler in ALIM_BEYNI.items():
         if sahe in sual:
