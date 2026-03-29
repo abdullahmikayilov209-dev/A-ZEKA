@@ -1,12 +1,13 @@
 import streamlit as st
 import torch
 import torch.nn as nn
+import math
 
 # 1. SƏHİFƏ AYARLARI
 st.set_page_config(page_title="A-Zeka", page_icon="🧠")
-st.title("🧠 A-Zeka: Rəqəmsal İntellekt")
+st.title("🧠 A-Zeka: Universal İntellekt")
 
-# 2. MODEL (BEYİN)
+# 2. MODEL (BEYİN - PyTorch)
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
@@ -31,7 +32,6 @@ for message in st.session_state.messages:
 
 # 4. ƏSAS HİSSƏ (GİRİŞ VƏ MƏNTİQ)
 if prompt := st.chat_input("Sualınızı bura yazın..."):
-    # Bu sətir 'if'-in daxilindədir, ona görə AttributeError verməyəcək!
     soru = prompt.lower()
     st.session_state.messages.append({"role": "user", "content": prompt})
     
@@ -39,85 +39,64 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("A-Zeka düşünür..."):
+        with st.spinner("A-Zeka neyronları analiz edir..."):
             
-            # --- ÖZƏL KİMLİK ---
-            if any(x in soru for x in ["kim yaradıb", "müəllif", "sahibin"]):
-                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam."
+            # --- ÖZƏL KİMLİK (Abdullah Mikayılov) ---
+            if any(x in soru for x in ["kim yaradıb", "müəllif", "sahibin", "yaradıcın"]):
+                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam. Onun vizyonu məni 10,000 sətirlik elm okeanına çevirməkdir!"
             
-            elif any(x in soru for x in ["kimsən", "nəsən"]):
-                cavab = "Mən A-Zeka-yam. Sənin rəqəmsal dünyanı asanlaşdıran köməkçiyəm."
+            elif any(x in soru for x in ["kimsən", "nəsən", "adın"]):
+                cavab = "Mən **A-Zeka**-yam. 1-ci sinifdən 11-ci sinfə qədər bütün elmləri öyrənməyə proqramlaşdırılmış süni intellektəm."
 
-            # --- ELMİ QAYDALAR (Viyet, Pifaqor və s.) ---
+            # --- RİYAZİYYAT QAYDALARI (1-11-ci Sinif) ---
             elif "viyet" in soru:
                 cavab = "Viyet teoremi kvadrat tənliyin kökləri arasındakı əlaqəni göstərir: \n\n* $x_1 + x_2 = -b/a$ \n* $x_1 \cdot x_2 = c/a$"
             
-            elif "pifaqor" in soru:
-                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda $a^2 + b^2 = c^2$."
+            elif "diskriminant" in soru:
+                cavab = "Kvadrat tənlik üçün: $D = b^2 - 4ac$. \n\n* $D > 0$: 2 kök \n* $D = 0$: 1 kök \n* $D < 0$: Həqiqi kök yoxdur."
 
-            # --- RİYAZİ HESABLAMA ---
-            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
+            elif "pifaqor" in soru:
+                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda katetlərin kvadratları cəmi hipotenuzun kvadratına bərabərdir: $a^2 + b^2 = c^2$."
+
+            elif "törəmə" in soru or "toreme" in soru:
+                cavab = "Törəmə funksiyanın dəyişmə sürətidir. Əsas düstur: $(x^n)' = nx^{n-1}$."
+
+            elif "inteqral" in soru:
+                cavab = "İnteqral törəmənin tərsidir və sahə hesabında istifadə olunur: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$."
+
+            elif "loqarifma" in soru:
+                cavab = "Loqarifma: $\log_a b = x \implies a^x = b$. Məsələn: $\log_2 8 = 3$."
+
+            elif "faiz" in soru:
+                cavab = "Ədədin faizini tapmaq üçün ədədi faiz göstərən ədədə vurub 100-ə bölmək lazımdır: $a \cdot p / 100$."
+
+            # --- FİZİKA VƏ DİGƏR ELMLƏR ---
+            elif "nyuton" in soru:
+                cavab = "Nyutonun II qanunu: Maddi nöqtəyə təsir edən qüvvə onun kütləsi və təcilinin hasilinə bərabərdir: $F = ma$."
+
+            elif "om qanunu" in soru:
+                cavab = "Dövrə hissəsi üçün Om qanunu: $I = U / R$."
+
+            elif "azərbaycan" in soru:
+                cavab = "Azərbaycan: Paytaxtı Bakı olan Odlar Yurdu. 1918-ci ildə Şərqdə ilk demokratik respublika qurub."
+
+            # --- MÜRƏKKƏB HESABLAMA MODULU (Dünya səviyyəli misallar) ---
+            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/^"):
                 try:
-                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
-                    cavab = f"Nəticə: **{eval(expr)}**"
+                    # Riyazi simvolları Python formatına çeviririk
+                    temp_calc = soru.replace("x", "*").replace("^", "**").replace(":", "/")
+                    safe_expr = "".join(c for c in temp_calc if c in "0123456789+-*/.**() ")
+                    result = eval(safe_expr)
+                    cavab = f"Sənin üçün 11-ci sinif səviyyəsində hesabladım: **{result}**"
                 except:
-                    cavab = "Misalı anlaya bilmədim, rəqəmləri yoxlayın."
+                    cavab = "Bu mürəkkəb misalda bir yazılış xətası var, zəhmət olmasa yoxla."
 
             # --- ÜMUMİ ---
             elif "salam" in soru:
-                cavab = "Salam! Necə kömək edə bilərəm?"
+                cavab = "Salam! Mən A-Zeka. Bu gün hansı çətin sualı həll edirik?"
             
             else:
-                cavab = f"'{prompt}' haqqında məlumatım hələ azdır, amma Abdullah bəy kodumu genişləndirir!"
-
-            st.markdown(cavab)
-            st.session_state.messages.append({"role": "assistant", "content": cavab})
-            with st.spinner("A-Zeka mürəkkəb riyazi neyronları işə salır..."):
-            soru = prompt.lower()
-            
-            # --- RİYAZİYYATIN QIZIL QAYDALARI (1-11-ci SİNİF) ---
-            
-            # 1. Cəbr və Tənliklər
-            if "viyet" in soru:
-                cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində köklər cəmi $x_1+x_2 = -b/a$, köklər hasili $x_1 \cdot x_2 = c/a$ olur."
-            elif "diskriminant" in soru:
-                cavab = "Kvadrat tənliyin həlli: $D = b^2 - 4ac$. Əgər $D>0$ isə iki kök, $D=0$ isə bir kök, $D<0$ isə həqiqi kökü yoxdur."
-            elif "loqarifma" in soru:
-                cavab = "Loqarifma qaydaları: $\log_a(bc) = \log_ab + \log_ac$ və $\log_a(b^n) = n \cdot \log_ab$."
-            
-            # 2. Triqonometriya və Həndəsə
-            elif any(x in soru for x in ["sinus", "kosinus", "triqonometriya"]):
-                cavab = "Əsas triqonometrik eynilik: $\sin^2x + \cos^2x = 1$. Sinuslar teoremi: $a/\sin A = b/\sin B = c/\sin C = 2R$."
-            elif "pifaqor" in soru:
-                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda katetlərin kvadratları cəmi hipotenuzun kvadratına bərabərdir ($a^2 + b^2 = c^2$)."
-            
-            # 3. Analizin Başlanğıcı (Törəmə və İnteqral)
-            elif "törəmə" in soru or "toreme" in soru:
-                cavab = "Törəmə cədvəli: $(x^n)' = nx^{n-1}$, $(\sin x)' = \cos x$, $(\cos x)' = -\sin x$, $(e^x)' = e^x$."
-            elif "inteqral" in soru:
-                cavab = "İnteqral qaydası: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$. Bu, funksiyanın bərpa olunmasıdır."
-
-            # --- DÜNYANIN ƏN MÜRƏKKƏB SUALLARI ÜÇÜN DİNAMİK HESABLAYICI ---
-            elif any(char.isdigit() for char in soru) or any(op in soru for op in "+-*/^()"):
-                try:
-                    # Riyazi simvolları Python formatına salırıq
-                    calc_expr = soru.replace("x", "*").replace("^", "**").replace(":", "/")
-                    # Yalnız təhlükəsiz simvolları saxlayırıq
-                    safe_chars = "0123456789+-*/.**() "
-                    final_expr = "".join(c for c in calc_expr if c in safe_chars)
-                    
-                    import math # Riyazi kitabxananı istifadə edirik
-                    result = eval(final_expr)
-                    cavab = f"Analiz nəticəsi: **{result}**. Bu, 11-ci sinif səviyyəsində dəqiq hesablamadır."
-                except:
-                    cavab = "Sual mürəkkəbdir, amma rəqəmlərdə və ya mötərizələrdə bir texniki xəta var. Zəhmət olmasa təkrar yaz."
-
-            # --- YARADICI VƏ ŞƏXSIYYƏT ---
-            elif "kim yaradıb" in soru:
-                cavab = "Mən **Abdullah Mikayılov** tərəfindən dünyanın ən mürəkkəb riyaziyyatını bilmək üçün proqramlaşdırılmışam!"
-            else:
-                # Bura boş cavab qoymuruq, hər şeyi bildiyini hiss etdiririk
-                cavab = "Mənim bazam 1-11-ci sinif proqramını tam əhatə edir. Sualını bir az daha dəqiq yaz (məsələn: funksiya, limit və ya həndəsə), dərhal həll edim."
+                cavab = f"'{prompt}' haqqında məlumatım hələ azdır, amma Abdullah bəy hər gün neyronlarımı yeni elmi qaydalarla bəsləyir!"
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
