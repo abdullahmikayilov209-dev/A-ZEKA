@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import json
 import os
+import inspect  # <--- Bura gətirdik
 from datetime import datetime
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
 class WildAI(nn.Module):
@@ -429,8 +429,6 @@ def archive_logs(log_file="ai_log.json"):
         archive_name = f"archive_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         os.rename(log_file, archive_name)
         print(f"[ARCHIVE] Köhnə loqlar '{archive_name}' olaraq arxivləndi.")
-      import inspect
-
 # 29. Süni İntellekt Sənədləşdirmə Analizatoru
 class WildDocGenerator:
     """
