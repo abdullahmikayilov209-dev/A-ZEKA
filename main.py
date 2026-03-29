@@ -5,6 +5,20 @@ import json
 import os
 import inspect
 from datetime import datetime
+import streamlit as st
+
+# --- STRUXTURUN BAŞLANĞICI ---
+st.set_page_config(page_title="A-Zeka AI", page_icon="🧠", layout="wide")
+
+st.title("🧠 A-Zeka: Rəqəmsal İmperiya")
+st.success("✅ Sistem Modulları Yüklənir... Zəhmət olmasa gözləyin.")
+
+# Yan Panel
+st.sidebar.title("💎 Sistem Statusu")
+st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
+
+# Bayram şarları (Uğurlu yüklənmə üçün)
+st.balloons()
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
