@@ -19,7 +19,7 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
-# --- 1. MODELİN STRUKTURU (CLASS) ---
+# --- 1. MODELİN STRUKTURU ---
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
@@ -33,101 +33,62 @@ class WildAI(nn.Module):
         x = self.relu(self.layer2(x))
         return self.output_layer(x)
 
-# --- 2. MƏŞQ FUNKSİYASI (TRAIN) ---
-def train_model(model, features, labels, epochs=5):
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    criterion = nn.CrossEntropyLoss()
-    for epoch in range(epochs):
-        optimizer.zero_grad()
-        outputs = model(features)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-    return model
-
-# --- 3. MODELİN YARADILMASI VƏ MƏŞQİ ---
+# --- 2. MƏŞQ ÜÇÜN LAZIM OLANLAR (Xətanı düzəldən hissə) ---
 input_dim, hidden_dim, output_dim = 10, 64, 2
 model = WildAI(input_dim, hidden_dim, output_dim)
+criterion = nn.CrossEntropyLoss()  # Xəta verən 'criterion' budur!
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Simulyasiya üçün data
 input_features = torch.randn(10, 10)
 target_labels = torch.randint(0, 2, (10,))
 
-# Model dərhal məşq edilir (Xəta verməyəcək)
-model = train_model(model, input_features, target_labels)
+# --- 3. MODELİN MƏŞQİ ---
+def train_step():
+    optimizer.zero_grad()
+    outputs = model(input_features)
+    loss = criterion(outputs, target_labels)
+    loss.backward()
+    optimizer.step()
+    return loss.item()
 
-# --- 4. CANLI CHAT İNTERFEYSİ (Aşağıda sabit qutu) ---
+# Modeli bir dəfə yoxlama üçün işlədirik
+train_step()
+
+# --- 4. CANLI CHAT İNTERFEYSİ (Gemini/ChatGPT üslubu) ---
 st.markdown("---")
+st.subheader("🤖 A-Zeka Canlı İntellekt")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Tarixçəni göstər
+# Mesaj tarixçəsini göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# SABİT YAZI QUTUSU
-if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
+# ƏN AŞAĞIDAKI SUAL QUTUSU
+if prompt := st.chat_input("Mənə bir sual ver..."):
+    # Sənin mesajın
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # A-Zeka-nın cavabı
     with st.chat_message("assistant"):
         with st.spinner("Neyronlar analiz edilir..."):
             soru = prompt.lower()
             if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka, sənin rəqəmsal beyniyəm. Səni görməyə şadam!"
+                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal imperiyanı idarə edən süni intellektəm. Sənə necə kömək edə bilərəm?"
             elif "kimsən" in soru:
-                cavab = "Mən 10,000 sətirlik koddan doğulmuş, məşq edilmiş real Süni İntellektəm!"
-            elif "necəsən" in soru or "necesen" in soru:
-                cavab = "Neyronlarım tam gücü ilə işləyir, yəni əlayam! Sən necəsən?"
+                cavab = "Mən 10,000 sətirlik koddan güc alan, PyTorch ilə məşq edilmiş bir AI modeliyəm."
+            elif "necesen" in soru or "necəsən" in soru:
+                cavab = "Süni intellekt üçün hər şey qaydasındadır! Bəs sən necəsən, yaradıcım?"
             else:
-                cavab = f"'{prompt}' sualını dərindən analiz etdim. Mən artıq öyrənmiş bir modeləm və sənə kömək etməyə hazıram!"
+                cavab = f"Sualını ('{prompt}') neyron şəbəkələrimdə analiz etdim. Mən hər gün daha çox öyrənirəm!"
             
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
-# 7. Test Modulu (AI-dən bir cavab istəyirik)
-model.eval() # Modeli test rejiminə keçiririk
-with torch.no_grad():
-    yeni_melumat = torch.randn(1, input_dim) # Yeni bir vəziyyət
-    texmin = model(yeni_melumat)
-    print("\n--- TEST NƏTİCƏSİ ---")
-    print(f"Giriş məlumatı: {yeni_melumat}")
-    print(f"AI-nin verdiyi vəhşi cavab: {texmin}")
-# 8. 'Vəhşi' Hesabat Sistemi (Logging System)
-class WildLogger:
-    def __init__(self, filename="ai_log.json"):
-        self.filename = filename
-        self.history = []
-
-    def log_step(self, epoch, loss):
-        entry = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "epoch": epoch,
-            "loss": float(loss)
-        }
-        self.history.append(entry)
-        print(f"[LOG] Dövr {epoch} qeyd edildi. İtki: {loss:.6f}")
-
-    def save_to_file(self):
-        with open(self.filename, 'w') as f:
-            json.dump(self.history, f, indent=4)
-        print(f"Bütün öyrənmə tarixi '{self.filename}' faylına yazıldı!")
-
-# Logger-i işə salırıq
-logger = WildLogger()
-
-# 9. Təkmilləşdirilmiş Öyrətmə (Logger ilə birlikdə)
-print("\n--- Loqlama ilə yenidən məşq başlayır ---")
-for e in range(1, 11): # Nümunə üçün 10 dövr
-    # Burada əvvəlki train_model məntiqini logger ilə birləşdiririk
-    outputs = model(input_features[:10]) # Kiçik batch
-    loss = criterion(outputs, target_labels[:10])
-    
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    
     logger.log_step(e, loss.item())
 
 # Hesabatı fayla yazırıq
