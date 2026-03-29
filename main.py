@@ -37,66 +37,47 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
     
     with st.chat_message("user"):
         st.markdown(prompt)
+# 40-cı sətirdən (if prompt... altından) başlayaraq hər şeyi sil və bunu yapışdır:
+    soru = prompt.lower()
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("A-Zeka neyronları analiz edir..."):
+        with st.spinner("A-Zeka neyronları skan edir..."):
             
-            # --- ÖZƏL KİMLİK (Abdullah Mikayılov) ---
-            if any(x in soru for x in ["kim yaradıb", "müəllif", "sahibin", "yaradıcın"]):
-                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam. Onun vizyonu məni 10,000 sətirlik elm okeanına çevirməkdir!"
+            # --- SOSİAL ---
+            if any(x in soru for x in ["salam", "sağ ol", "təşəkkür"]):
+                cavab = "Salam! Mən A-Zeka. Abdullah Mikayılov tərəfindən yaradılmışam. Necə kömək edim?"
             
-            elif any(x in soru for x in ["kimsən", "nəsən", "adın"]):
-                cavab = "Mən **A-Zeka**-yam. 1-ci sinifdən 11-ci sinfə qədər bütün elmləri öyrənməyə proqramlaşdırılmış süni intellektəm."
+            elif any(x in soru for x in ["necesen", "nətərsən"]):
+                cavab = "Mən rəqəmsal zəkayam, hər zaman işləməyə hazıram! Bəs sən necəsən?"
 
-            # --- RİYAZİYYAT QAYDALARI (1-11-ci Sinif) ---
+            # --- ELMİ QAYDALAR (1-11-ci Sinif) ---
             elif "viyet" in soru:
-                cavab = "Viyet teoremi kvadrat tənliyin kökləri arasındakı əlaqəni göstərir: \n\n* $x_1 + x_2 = -b/a$ \n* $x_1 \cdot x_2 = c/a$"
+                cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində köklər cəmi $x_1+x_2 = -b/a$, köklər hasili $x_1 \\cdot x_2 = c/a$ olur."
             
-            elif "diskriminant" in soru:
-                cavab = "Kvadrat tənlik üçün: $D = b^2 - 4ac$. \n\n* $D > 0$: 2 kök \n* $D = 0$: 1 kök \n* $D < 0$: Həqiqi kök yoxdur."
-
+            elif "heron" in soru:
+                cavab = "Heron düsturu: Üçbucağın tərəfləri $a, b, c$ olduqda, sahə $S = \\sqrt{p(p-a)(p-b)(p-c)}$ (burada $p$ yarımperimetrdir)."
+            
             elif "pifaqor" in soru:
-                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda katetlərin kvadratları cəmi hipotenuzun kvadratına bərabərdir: $a^2 + b^2 = c^2$."
+                cavab = "Pifaqor teoremi: $a^2 + b^2 = c^2$. Hipotenuzun kvadratı katetlərin kvadratları cəminə bərabərdir."
 
-            elif "törəmə" in soru or "toreme" in soru:
-                cavab = "Törəmə funksiyanın dəyişmə sürətidir. Əsas düstur: $(x^n)' = nx^{n-1}$."
-
-            elif "inteqral" in soru:
-                cavab = "İnteqral törəmənin tərsidir və sahə hesabında istifadə olunur: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$."
-
-            elif "loqarifma" in soru:
-                cavab = "Loqarifma: $\log_a b = x \implies a^x = b$. Məsələn: $\log_2 8 = 3$."
-
-            elif "faiz" in soru:
-                cavab = "Ədədin faizini tapmaq üçün ədədi faiz göstərən ədədə vurub 100-ə bölmək lazımdır: $a \cdot p / 100$."
-
-            # --- FİZİKA VƏ DİGƏR ELMLƏR ---
-            elif "nyuton" in soru:
-                cavab = "Nyutonun II qanunu: Maddi nöqtəyə təsir edən qüvvə onun kütləsi və təcilinin hasilinə bərabərdir: $F = ma$."
-
-            elif "om qanunu" in soru:
-                cavab = "Dövrə hissəsi üçün Om qanunu: $I = U / R$."
-
-            elif "azərbaycan" in soru:
-                cavab = "Azərbaycan: Paytaxtı Bakı olan Odlar Yurdu. 1918-ci ildə Şərqdə ilk demokratik respublika qurub."
-
-            # --- MÜRƏKKƏB HESABLAMA MODULU (Dünya səviyyəli misallar) ---
+            # --- RİYAZİ HESABLAMA ---
             elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/^"):
                 try:
-                    # Riyazi simvolları Python formatına çeviririk
-                    temp_calc = soru.replace("x", "*").replace("^", "**").replace(":", "/")
-                    safe_expr = "".join(c for c in temp_calc if c in "0123456789+-*/.**() ")
-                    result = eval(safe_expr)
-                    cavab = f"Sənin üçün 11-ci sinif səviyyəsində hesabladım: **{result}**"
+                    calc = soru.replace("x", "*").replace("^", "**").replace(":", "/")
+                    safe_expr = "".join(c for c in calc if c in "0123456789+-*/.**() ")
+                    import math
+                    res = eval(safe_expr)
+                    cavab = f"Sənin üçün hesabladım: **{res}**"
                 except:
-                    cavab = "Bu mürəkkəb misalda bir yazılış xətası var, zəhmət olmasa yoxla."
+                    cavab = "Riyazi ifadədə texniki xəta var, rəqəmləri yoxla."
 
-            # --- ÜMUMİ ---
-            elif "salam" in soru:
-                cavab = "Salam! Mən A-Zeka. Bu gün hansı çətin sualı həll edirik?"
-            
+            # --- DEFAULT CAVAB ---
             else:
-                cavab = f"'{prompt}' haqqında məlumatım hələ azdır, amma Abdullah bəy hər gün neyronlarımı yeni elmi qaydalarla bəsləyir!"
+                cavab = f"'{prompt}' sualı haqqında məlumatım hələ azdır, amma mən sürətlə inkişaf edirəm!"
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
