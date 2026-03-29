@@ -1,41 +1,24 @@
 import streamlit as st
 from groq import Groq
-import PIL.Image # Şəkillərlə işləmək üçün
+import base64
 
-# API açarını Secrets-dən götürürük
-try:
-    api_key = st.secrets["GROQ_API_KEY"]
-except KeyError:
-    st.error("Xəta: GROQ_API_KEY tapılmadı!")
-    st.stop()
+# ... (API açarı və client hissəsi eynidir)
 
-client = Groq(api_key=api_key)
+# Şəkli oxumaq üçün köməkçi funksiya (Groq Vision üçün lazımdır)
+def encode_image(image_file):
+    return base64.b64encode(image_file.getvalue()).decode('utf-8')
 
-st.set_page_config(page_title="Zəka AI", page_icon="🇦🇿", layout="wide")
+# 1. Şəkil yükləmə "düyməsini" sual qutusunun üstünə qoyuruq
+col1, col2 = st.columns([0.1, 0.9])
+with col1:
+    # Bu düymə vizual olaraq "+" funksiyasını yerinə yetirir
+    uploaded_file = st.file_uploader("➕", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
 
-# SOL PANEL (Sidebar) - Şəkil yükləmək üçün "+" funksiyası burada olacaq
-with st.sidebar:
-    st.title("➕ Seçimlər")
-    uploaded_file = st.file_uploader("Sualın şəklini çək və ya yüklə", type=['png', 'jpg', 'jpeg'])
-    if uploaded_file:
-        image = PIL.Image.open(uploaded_file)
-        st.image(image, caption='Yüklənən şəkil', use_container_width=True)
-        st.success("Şəkil yükləndi! İndi sualınızı yazın.")
+# 2. Əgər şəkil seçilibsə, onu kiçik formada göstərək ki, yer tutmasın
+if uploaded_file:
+    st.image(uploaded_file, width=100, caption="Yükləndi")
 
-st.title("🇦🇿 Zəka AI")
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Mesajları göstər
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        if message["role"] == "user":
-            st.text(message["content"])
-        else:
-            st.markdown(message["content"])
-
-# Giriş hissəsi
+# 3. Sual qutusu
 if prompt := st.chat_input("Sualınızı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     
@@ -44,23 +27,37 @@ if prompt := st.chat_input("Sualınızı yazın..."):
 
     with st.chat_message("assistant"):
         try:
-            # Əgər şəkil yüklənibsə, Sİ-yə şəkli təsvir etməyi tapşırırıq
-            # QEYD: Groq Vision üçün model adını dəyişməliyik (məsələn: llama-3.2-11b-vision-preview)
-            
-            model_name = "llama-3.3-70b-versatile"
-            system_msg = "Sən Zəka AI-san. Riyazi misalları və sualları Azərbaycan dilində dəqiq həll edirsən."
-            
+            # ƏGƏR ŞƏKİL VARSA: Vision modelini işə salırıq
             if uploaded_file:
-                system_msg += " İstifadəçi həmçinin bir şəkil yükləyib. Şəkildəki məlumatları nəzərə al."
+                base64_image = encode_image(uploaded_file)
+                model_to_use = "llama-3.2-11b-vision-preview" # Şəkli görən model
+                
+                messages_with_image = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                            }
+                        ]
+                    }
+                ]
+            else:
+                # Şəkil yoxdursa, normal 70B modeli ilə davam edirik
+                model_to_use = "llama-3.3-70b-versatile"
+                messages_with_image = st.session_state.messages
 
             chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": system_msg}] + st.session_state.messages,
-                model=model_name,
+                messages=messages_with_image,
+                model=model_to_use,
                 temperature=0.2,
             )
             
             response = chat_completion.choices[0].message.content
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
+            
         except Exception as e:
             st.error(f"Xəta: {str(e)}")
