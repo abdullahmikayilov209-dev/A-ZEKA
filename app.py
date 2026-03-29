@@ -1,6 +1,5 @@
 import streamlit as st
 from groq import Groq
-import base64
 
 # API açarını Secrets-dən götürürük
 try:
@@ -11,39 +10,61 @@ except KeyError:
 
 client = Groq(api_key=api_key)
 
-# --- "+" DÜYMƏSİNİ QUTUNUN İÇİNƏ QOYAN CSS ---
+# --- "+" DÜYMƏSİNİ QUTUNUN İÇİNƏ MƏCBURİ YERLƏŞDİRƏN CSS ---
 st.markdown("""
     <style>
-    /* Fayl yükləmə düyməsinin stilini dəyişib tam küncə qoyuruq */
+    /* 1. Fayl yükləmə qutusunu tamamilə kiçik bir "+" düyməsinə çeviririk */
     .stFileUploader {
         position: fixed;
-        bottom: 31px; /* Sual qutusunun hündürlüyünə uyğun */
-        left: 35px;   /* Sol tərəfdən məsafə */
+        bottom: 35px !important; /* Çat qutusunun hündürlüyünə tam uyğun */
+        left: 45px !important;   /* Sola yapışdırırıq */
         width: 40px !important;
-        z-index: 10000;
-        background-color: transparent !important;
+        z-index: 1000000 !important;
     }
+    
+    /* Düymənin daxili elementlərini gizlədirik */
     .stFileUploader section {
         padding: 0 !important;
         border: none !important;
-        background: none !important;
+        background-color: transparent !important;
     }
+    
     .stFileUploader label {
         display: none !important;
     }
+
+    /* "Browse files" düyməsini dairəvi "+" düyməsi edirik */
     .stFileUploader button {
         border-radius: 50% !important;
-        width: 34px !important;
-        height: 34px !important;
-        background-color: transparent !important;
-        border: 1px solid #ddd !important;
-        color: #666 !important;
-        font-size: 20px !important;
-        font-weight: bold;
+        width: 35px !important;
+        height: 35px !important;
+        background-color: #f0f2f6 !important; /* Gemini-dəki kimi açıq boz */
+        border: 1px solid #d1d1d1 !important;
+        color: #333 !important;
+        font-size: 22px !important;
+        font-weight: 300 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
     }
-    /* Sual qutusunun daxilindəki yazını sağa çəkirik ki, düyməyə dəyməsin */
+
+    /* Düymənin içindəki orijinal yazını silib "+" yazırıq */
+    .stFileUploader button div {
+        display: none !important;
+    }
+    .stFileUploader button::before {
+        content: "+" !important;
+    }
+
+    /* 2. Sual qutusunu (Input) düyməyə görə tənzimləyirik */
+    .stChatInputContainer {
+        padding-left: 60px !important; /* Yazı düymənin altından başlamasın */
+    }
+    
     .stChatInputContainer textarea {
-        padding-left: 45px !important;
+        background-color: #ffffff !important;
+        border-radius: 25px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -65,8 +86,8 @@ for message in st.session_state.messages:
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    # Şəkil yüklənəndə çatın üstündə kiçik bir önbaxış göstərsin
-    st.info("📷 Şəkil əlavə olundu. Sualınızı yazın.")
+    # Şəkil yüklənəndə çat ekranında kiçik bildiriş
+    st.toast("📷 Şəkil əlavə edildi!", icon="✅")
 
 # Sual qutusu
 if prompt := st.chat_input("Sualınızı bura yazın..."):
@@ -76,12 +97,12 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
 
     with st.chat_message("assistant"):
         try:
-            # Şəkil varsa Vision (llama-3.2-11b), yoxsa normal (70b) model
-            model_to_use = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
+            # Model seçimi
+            model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
             
             chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Sən Zəka AI-san. Azərbaycanlılara kömək edirsən."}] + st.session_state.messages,
-                model=model_to_use,
+                messages=[{"role": "system", "content": "Sən səmimi Zəka AI-san."}] + st.session_state.messages,
+                model=model,
             )
             response = chat_completion.choices[0].message.content
             st.markdown(response)
