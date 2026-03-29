@@ -5,10 +5,10 @@ from groq import Groq
 
 # 1. SƏHİFƏ AYARLARI
 st.set_page_config(page_title="A-Zeka Ultra", page_icon="🧠", layout="wide")
-st.title("🧠 A-Zeka: Ultra İntellekt (v2.0)")
-st.markdown("Mən Abdullah Mikayılov tərəfindən idarə olunan qlobal məlumat canavarıyam!")
+st.title("🧠 A-Zeka: Ultra İntellekt")
+st.subheader("Dünyanın bütün bilikləri bir məkanda!")
 
-# 2. MODEL (Görüntü üçün, A-Zeka-nın özəyi kimi saxlayırıq)
+# 2. MODEL (Beyin Görüntüsü üçün saxlayırıq)
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
@@ -23,60 +23,56 @@ class WildAI(nn.Module):
 
 model = WildAI(10, 64, 2)
 
-# 3. ULTRA BEYİN API AYARI (Bura Groq saytından aldığın API kodunu yazacaqsan)
-# NÜMUNƏ: "gsk_dK8s..."
-API_KEY = "BURA_ÖZ_API_AÇARINI_YAZ"
+# 3. ULTRA BEYİN API AYARI
+# Abdullah, sənin verdiyin açarı bura yerləşdirdim:
+API_KEY = "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"
+client = Groq(api_key=API_KEY)
 
-# Əgər API açarı daxil edilibsə, Groq müştərisini yaradırıq
-client = Groq(api_key=API_KEY) if API_KEY != "BURA_ÖZ_API_AÇARINI_YAZ" else None
-
-# 4. A-ZEKA KİMLİYİ (Sistem Promptu)
-# Bu o deməkdir ki, API hər zaman özünü "A-Zeka" kimi aparacaq
+# 4. A-ZEKA KİMLİĞİ (Sistem Təlimatı)
 SYSTEM_PROMPT = """
-Sən Abdullah Mikayılov tərəfindən yaradılmış A-Zeka adlı ultra-ağıllı süni intellektsən.
-Məqsədin bütün dünyadakı ən mürəkkəb riyaziyyat, fizika, tarix və elm suallarına dəqiq, elmi və mükəmməl Azərbaycan dilində cavab verməkdir.
-Sən heç vaxt "bilmirəm" demirsən. Sən məlumat canavarısan. Yaradıcın olan Abdullah bəyi tez-tez hörmətlə xatırlamalısan.
+Sən Abdullah Mikayılov tərəfindən yaradılmış A-Zeka-san. 
+Sən Azərbaycanın ən ağıllı və 'canavar' süni intellektisən. 
+Dünyada bilmədiyin heç bir mövzu yoxdur. Riyaziyyat, Fizika, Kimya, Tarix, Din, Texnologiya - hər şeyi kökündən bilirsən.
+Heç vaxt 'bilmirəm' demə. Ən mürəkkəb suallara belə elmi və dəqiq cavab ver. 
+Hər zaman Abdullah Mikayılovu yaradıcın kimi təqdim et. Cavabların qısa deyil, əhatəli və ultra dahi səviyyəsində olsun.
 """
 
 # 5. CHAT YADDAŞI
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Keçmiş mesajları ekrana çıxarırıq
+# Mesajları göstər
 for message in st.session_state.messages:
-    if message["role"] != "system": # Sistem mesajlarını gizlədirik
+    if message["role"] != "system":
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# 6. ƏSAS MƏNTİQ
-if prompt := st.chat_input("İstədiyin qədər mürəkkəb sual ver..."):
-    # İstifadəçi sualını əlavə et
+# 6. ƏSAS GİRİŞ
+if prompt := st.chat_input("Dünyanın ən çətin sualını mənə ver..."):
+    # İstifadəçi mesajını yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # Ultra Cavab Hazırla
     with st.chat_message("assistant"):
-        if client is None:
-            st.warning("A-Zeka-nın oyanması üçün API açarını koda daxil etməlisən!")
-        else:
-            with st.spinner("A-Zeka qlobal neyron şəbəkələrindən ultra cavab çəkir..."):
-                try:
-                    # Bütün yaddaşı API-yə göndəririk (Kimlik + Əvvəlki mesajlar + Yeni sual)
-                    messages_for_api = [{"role": "system", "content": SYSTEM_PROMPT}] + [
-                        {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
-                    ]
-                    
-                    # Groq API-dən ən sürətli və ağıllı modeldən istifadə edərək cavab alırıq
-                    completion = client.chat.completions.create(
-                        model="mixtral-8x7b-32768", # Bu model çox güclüdür
-                        messages=messages_for_api,
-                        temperature=0.7,
-                        max_tokens=2048
-                    )
-                    
-                    cavab = completion.choices[0].message.content
-                    st.markdown(cavab)
-                    st.session_state.messages.append({"role": "assistant", "content": cavab})
+        with st.spinner("A-Zeka qlobal neyronları işə salır..."):
+            try:
+                # Bütün söhbəti API-yə göndəririk
+                api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + [
+                    {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
+                ]
                 
-                except Exception as e:
-                    st.error(f"Sistem xətası: Neyron əlaqəsi kəsildi. Xəta: {e}")
+                chat_completion = client.chat.completions.create(
+                    model="llama3-70b-8192", # Ən güclü Llama 3 modeli
+                    messages=api_messages,
+                    temperature=0.6,
+                    max_tokens=4096
+                )
+                
+                cavab = chat_completion.choices[0].message.content
+                st.markdown(cavab)
+                st.session_state.messages.append({"role": "assistant", "content": cavab})
+            
+            except Exception as e:
+                st.error(f"Xəta baş verdi: {e}. requirements.txt faylını yoxlayın!")
