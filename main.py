@@ -117,3 +117,45 @@ if prompt := st.chat_input("A-Zeka ilə danışın..."):
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+with st.spinner("Düşünürəm..."):
+            soru = prompt.lower()
+            
+            # --- ÖZƏL KİMLİK VƏ YARADICI ---
+            if any(x in soru for x in ["kim yaradıb", "müəllif", "sahibin"]):
+                cavab = "Mən **Abdullah Mikayılov** tərəfindən yaradılmış ali bir zəkayam. Onun vizyonu və kodları sayəsində bura qədər gəlmişəm."
+            
+            elif any(x in soru for x in ["kimsən", "nəsən"]):
+                cavab = "Mən A-Zeka-yam. Sənin rəqəmsal dünyanı asanlaşdırmaq, riyazi və elmi suallarını cavablandırmaq üçün buradayam."
+
+            # --- ELMİ QAYDALAR VƏ TERMİNLƏR (GENİŞLƏNDİRİLMİŞ) ---
+            elif "viyet" in soru:
+                cavab = "Viyet teoremi kvadrat tənliyin kökləri ilə əmsalları arasındakı əlaqəni göstərir. $ax^2 + bx + c = 0$ tənliyi üçün: \n\n* Köklər cəmi: $x_1 + x_2 = -b/a$ \n* Köklər hasili: $x_1 \cdot x_2 = c/a$"
+            
+            elif "pifaqor" in soru:
+                cavab = "Pifaqor teoreminə görə düzbucaqlı üçbucaqda hipotenuzun kvadratı katetlərin kvadratları cəminə bərabərdir: $a^2 + b^2 = c^2$."
+
+            elif "nyuton" in soru:
+                cavab = "Nyutonun ikinci qanunu hərəkət dinamikasının əsasıdır: $F = ma$. Yəni qüvvə kütlə ilə təcilin hasilinə bərabərdir."
+
+            # --- RİYAZİ HESABLAMA ---
+            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
+                try:
+                    expr = "".join(c for c in soru.replace("x", "*") if c in "0123456789+-*/.**()")
+                    res = eval(expr)
+                    cavab = f"Hesabladım: **{res}**"
+                except:
+                    cavab = "Bu misalı həll edərkən kiçik bir çətinlik çəkdim, rəqəmləri yoxlaya bilərsən?"
+
+            # --- ÜMUMİ VƏ MARAQLI CAVABLAR ---
+            elif "salam" in soru:
+                cavab = "Salam! Necə kömək edə bilərəm? Bu gün nəyi öyrənirik?"
+            
+            elif "sağ ol" in soru or "təşəkkür" in soru:
+                cavab = "Xoşdur! Hər zaman xidmətindəyəm."
+
+            # --- SADE VƏ MƏNTİQLİ BİTMƏ (Robotik cümlələr yoxdur) ---
+            else:
+                cavab = f"'{prompt}' haqqında hələ ki dərin məlumatım yoxdur, amma üzərimdə işləyərək bunu öyrənə bilərəm. Başqa nəyi bilmək istəyirsən?"
+
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
