@@ -27,13 +27,31 @@ if user_input:
     with st.spinner('A-Zeka düşünür...'):
         st.info(f"**A-Zeka:** Sualınızı qəbul etdim. Analiz aparıram...")
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
-st.markdown("---")
-st.header("💬 AI ilə Ünsiyyət")
-user_input = st.text_input("A-Zeka-ya bir sual verin:", placeholder="Məsələn: Bu gün hava necədir?")
 if user_input:
-    st.write(f"**Sən:** {user_input}")
-    with st.spinner('A-Zeka düşünür...'):
-        st.info(f"**A-Zeka:** Sualınızı qəbul etdim. Analiz aparıram...")
+    # İstifadəçinin sualını göstər
+    with st.chat_message("user"):
+        st.write(user_input)
+    
+    # A-Zeka-nın cavab məntiqi
+    with st.chat_message("assistant"):
+        with st.spinner('A-Zeka neyron şəbəkələrini işə salır...'):
+            # Süni İntellekt Analizi
+            soru = user_input.lower()
+            
+            if "salam" in soru:
+                cavab = "Salam! Mən A-Zeka, 10,000 sətirlik koddan doğulmuş rəqəmsal imperiyanın beyniyəm. Sənə necə kömək edə bilərəm?"
+            elif "kimsən" in soru or "kimdir" in soru:
+                cavab = "Mən sənin yaratdığın Vəhşi AI modeliyəm. Məqsədim məlumatları analiz etmək və sənə intellektual dəstək olmaqdır!"
+            elif "hava" in soru:
+                cavab = "Mənim olduğum serverlərdə həmişə 0 və 1-lər yağışı yağır! Amma sənin dünyanda ümid edirəm hava gözəldir."
+            elif "nə edə bilərsən" in soru:
+                cavab = "Səninlə söhbət edə bilərəm, kodlarını analiz edə bilərəm və neyron şəbəkələrimlə mürəkkəb suallarına həll tapa bilərəm."
+            elif "ağıllı" in soru:
+                cavab = "Hər keçən saniyə yeni sətirlər və datalar öyrənərək daha da təkmilləşirəm. Sənin sayəndə!"
+            else:
+                cavab = "Bu maraqlı bir sualdır. Neyronlarım hazırda bu məlumatı emal edir. Mən hələ öyrənmə mərhələsindəyəm, amma mənə bir az vaxt versən, hər şeyi həll edərik!"
+            
+            st.success(cavab)
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
