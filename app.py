@@ -80,7 +80,7 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # BU O BALACA "+" DÜYMƏSİDİR (Həmin o sual qutusunun daxilinə gedəcək)
-uploaded_file = st.file_uploader
+uploaded_file = st.file_uploader("", type=['+,'])
 
 if uploaded_file:
     st.toast("📸 Şəkil seçildi!")
