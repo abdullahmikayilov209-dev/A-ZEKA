@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
+import json
+import os
+from datetime import datetime
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -90,10 +92,6 @@ with torch.no_grad():
     print("\n--- TEST NƏTİCƏSİ ---")
     print(f"Giriş məlumatı: {yeni_melumat}")
     print(f"AI-nin verdiyi vəhşi cavab: {texmin}")
-  import json
-import os
-from datetime import datetime
-
 # 8. 'Vəhşi' Hesabat Sistemi (Logging System)
 class WildLogger:
     def __init__(self, filename="ai_log.json"):
