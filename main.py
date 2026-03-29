@@ -150,3 +150,36 @@ with st.spinner("Riyazi neyronlar aktivləşdirilir..."):
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+# ... (yuxarıda model və digər kodlar var)
+
+# 1. Mesaj tarixçəsini yaddaşda saxlamaq üçün (Əgər yuxarıda yoxdursa)
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# 2. Köhnə mesajları ekranda göstərmək üçün
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# 3. ƏSAS HİSSƏ: Yazı qutusu və Cavab məntiqi
+if prompt := st.chat_input("Sualınızı bura yazın..."):
+    # Diqqət: Aşağıdakı bütün sətirlər if-in daxilindədir (4 boşluq sağda)
+    soru = prompt.lower()
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Neyronlar analiz edir..."):
+            # Buradakı 'if/elif' blokları 'with' daxilindədir (daha 4 boşluq sağda)
+            if "salam" in soru:
+                cavab = "Salam! Mən A-Zeka."
+            elif "azərbaycan" in soru:
+                cavab = "Azərbaycan: Paytaxtı Bakı şəhəridir."
+            # Bura yeni ölkələr və riyazi modullar əlavə edərək kodu 10,000 sətirə çatdıracağıq
+            else:
+                cavab = "Bunu hələ öyrənməmişəm, amma üzərimdə işləyirik!"
+            
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
