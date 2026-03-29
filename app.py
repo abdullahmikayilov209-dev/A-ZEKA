@@ -9,7 +9,7 @@ except:
     st.error("API Key tapılmadı!")
     st.stop()
 
-# --- GEMINI ÜSLUBU: BÖYÜK QUTUNU SİLİB "+" QOYAN CSS ---
+# --- GEMINI STİLİ: BÜYÜK QUTUNU SİLİB "+" QOYAN KOD ---
 st.markdown("""
     <style>
     /* 1. Sual qutusunu (Chat Input) tənzimləyirik */
@@ -20,20 +20,18 @@ st.markdown("""
     [data-testid="stChatInput"] textarea {
         border-radius: 25px !important;
         padding-left: 45px !important;
-        background-color: #ffffff !important;
     }
 
-    /* 2. O böyük 'Drag and Drop' qutusunu tamamilə 'öldürürük' */
+    /* 2. O böyük eybəcər qutunu (Drag and Drop) tamamilə gizlədirik */
     [data-testid="stFileUploader"] {
         position: fixed;
-        bottom: 34px; /* Qutunun hündürlüyünə tam uyğun */
-        left: 42px;   /* Sol tərəfə yapışdır */
+        bottom: 34px; /* Qutunun daxilinə tam otursun */
+        left: 42px;   
         width: 35px !important;
         z-index: 99999;
-        padding: 0 !important;
     }
 
-    /* Bütün çərçivələri və yazıları gizlət */
+    /* Bütün artıq yazıları və çərçivələri silirik */
     [data-testid="stFileUploader"] section {
         padding: 0 !important;
         border: none !important;
@@ -46,33 +44,29 @@ st.markdown("""
         display: none !important;
     }
 
-    /* 3. 'Browse files' düyməsini balaca '+' edirik */
+    /* 3. Sadəcə balaca "+" düyməsini saxlayırıq */
     [data-testid="stFileUploader"] button {
         border-radius: 50% !important;
         width: 32px !important;
         height: 32px !important;
         background-color: transparent !important;
         border: none !important;
-        color: #5f6368 !important; /* Gemini rəngi */
+        color: #5f6368 !important;
         font-size: 30px !important;
         font-weight: 200 !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        box-shadow: none !important;
-        margin: 0 !important;
     }
 
-    /* Düymənin içinə məcburi '+' qoyuruq */
+    /* Düymənin içinə "+" işarəsini məcburi qoyuruq */
     [data-testid="stFileUploader"] button::after {
         content: "+" !important;
-        visibility: visible;
-        position: absolute;
+        visibility: visible !important;
     }
     
-    /* Orijinal yazını gizlət */
     [data-testid="stFileUploader"] button div {
-        display: none !important;
+        display: none !important; /* Orijinal yazını gizlət */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -82,33 +76,27 @@ st.title("🇦🇿 Zəka AI")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları göstər
+# Mesajlar
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        if message["role"] == "user":
-            st.text(message["content"])
-        else:
-            st.markdown(message["content"])
+        st.write(message["content"])
 
-# BU O BALACA "+" DÜYMƏSİDİR
+# Sənin istədiyin o balaca "+" düyməsi budur:
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    st.sidebar.image(uploaded_file, caption="Yüklənən şəkil", width=100)
-    st.toast("Şəkil hazırdır!")
+    st.toast("Şəkil yükləndi!")
 
 # Sual qutusu
 if prompt := st.chat_input("Sualınızı bura yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.text(prompt)
+        st.write(prompt)
 
     with st.chat_message("assistant"):
-        # Şəkil varsa Vision modeli, yoxsa normal
         model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
-        
         chat_completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": "Sən səmimi Zəka AI-san."}] + st.session_state.messages,
+            messages=[{"role": "system", "content": "Sən Zəka AI-san."}] + st.session_state.messages,
             model=model,
         )
         response = chat_completion.choices[0].message.content
