@@ -11,16 +11,17 @@ except KeyError:
 
 client = Groq(api_key=api_key)
 
-# --- GÖZƏL DİZAYN ÜÇÜN CSS ---
+# --- "+" DÜYMƏSİNİ QUTUNUN İÇİNƏ QOYAN CSS ---
 st.markdown("""
     <style>
-    /* Fayl yükləmə düyməsini balaca "+" şəklinə salırıq */
+    /* Fayl yükləmə düyməsinin stilini dəyişib tam küncə qoyuruq */
     .stFileUploader {
         position: fixed;
-        bottom: 38px;
-        left: 20px;
-        width: 45px !important;
-        z-index: 9999;
+        bottom: 31px; /* Sual qutusunun hündürlüyünə uyğun */
+        left: 35px;   /* Sol tərəfdən məsafə */
+        width: 40px !important;
+        z-index: 10000;
+        background-color: transparent !important;
     }
     .stFileUploader section {
         padding: 0 !important;
@@ -30,29 +31,19 @@ st.markdown("""
     .stFileUploader label {
         display: none !important;
     }
-    /* "Browse files" yazısını gizlədib yerinə "+" qoyuruq */
     .stFileUploader button {
         border-radius: 50% !important;
-        width: 40px !important;
-        height: 40px !important;
-        background-color: #f0f2f6 !important;
-        border: 1px solid #ccc !important;
-        color: #555 !important;
-        font-size: 24px !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 34px !important;
+        height: 34px !important;
+        background-color: transparent !important;
+        border: 1px solid #ddd !important;
+        color: #666 !important;
+        font-size: 20px !important;
+        font-weight: bold;
     }
-    .stFileUploader button::after {
-        content: "+";
-    }
-    .stFileUploader button div {
-        display: none;
-    }
-    
-    /* Çat girişini düyməyə görə bir az sağa çəkirik */
-    .stChatInputContainer {
-        padding-left: 55px !important;
+    /* Sual qutusunun daxilindəki yazını sağa çəkirik ki, düyməyə dəyməsin */
+    .stChatInputContainer textarea {
+        padding-left: 45px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -74,7 +65,8 @@ for message in st.session_state.messages:
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    st.sidebar.image(uploaded_file, caption="Yükləndi", width=150)
+    # Şəkil yüklənəndə çatın üstündə kiçik bir önbaxış göstərsin
+    st.info("📷 Şəkil əlavə olundu. Sualınızı yazın.")
 
 # Sual qutusu
 if prompt := st.chat_input("Sualınızı bura yazın..."):
@@ -84,12 +76,12 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
 
     with st.chat_message("assistant"):
         try:
-            # Şəkil varsa Vision modelinə keçir
-            model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
+            # Şəkil varsa Vision (llama-3.2-11b), yoxsa normal (70b) model
+            model_to_use = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
             
             chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Sən Zəka AI-san. Səmimi ol və Azərbaycan dilində cavab ver."}] + st.session_state.messages,
-                model=model,
+                messages=[{"role": "system", "content": "Sən Zəka AI-san. Azərbaycanlılara kömək edirsən."}] + st.session_state.messages,
+                model=model_to_use,
             )
             response = chat_completion.choices[0].message.content
             st.markdown(response)
