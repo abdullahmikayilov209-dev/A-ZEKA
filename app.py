@@ -1,5 +1,6 @@
 import streamlit as st
 from groq import Groq
+import PIL.Image # Şəkillərlə işləmək üçün
 
 # API açarını Secrets-dən götürürük
 try:
@@ -10,46 +11,55 @@ except KeyError:
 
 client = Groq(api_key=api_key)
 
-st.set_page_config(page_title="Zəka AI", page_icon="🇦🇿")
-st.title("🇦🇿 Milli Süni İntellekt")
+st.set_page_config(page_title="Zəka AI", page_icon="🇦🇿", layout="wide")
 
-# Yaddaş tənzimləməsi
+# SOL PANEL (Sidebar) - Şəkil yükləmək üçün "+" funksiyası burada olacaq
+with st.sidebar:
+    st.title("➕ Seçimlər")
+    uploaded_file = st.file_uploader("Sualın şəklini çək və ya yüklə", type=['png', 'jpg', 'jpeg'])
+    if uploaded_file:
+        image = PIL.Image.open(uploaded_file)
+        st.image(image, caption='Yüklənən şəkil', use_container_width=True)
+        st.success("Şəkil yükləndi! İndi sualınızı yazın.")
+
+st.title("🇦🇿 Zəka AI")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları göstərərkən səninkini "SADƏ MƏTN", AI-nınkını "MARKDOWN" kimi göstəririk
+# Mesajları göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "user":
-            # Sənin yazdığın o uzun kəsrlər burada xarab olmayacaq:
             st.text(message["content"])
         else:
-            # AI-nın cavabı normal qaydada (markdown) görünəcək
             st.markdown(message["content"])
 
 # Giriş hissəsi
-if prompt := st.chat_input("Sualınızı və ya misalı bura yazın..."):
-    # İstifadəçi mesajını yaddaşa əlavə et
+if prompt := st.chat_input("Sualınızı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     
     with st.chat_message("user"):
-        # Sənin yazdığını ekranda "sadə mətn" kimi göstəririk ki, dağılmasın
         st.text(prompt)
 
     with st.chat_message("assistant"):
         try:
-            # Sistem təlimatını buraya əlavə edirik ki, hər dəfə oxusun
-            full_messages = [
-                {"role": "system", "content": "Sən Zəka AI-san. Səmimi ol və riyazi misalları addım-addım Azərbaycan dilində izah et."}
-            ] + st.session_state.messages
+            # Əgər şəkil yüklənibsə, Sİ-yə şəkli təsvir etməyi tapşırırıq
+            # QEYD: Groq Vision üçün model adını dəyişməliyik (məsələn: llama-3.2-11b-vision-preview)
+            
+            model_name = "llama-3.3-70b-versatile"
+            system_msg = "Sən Zəka AI-san. Riyazi misalları və sualları Azərbaycan dilində dəqiq həll edirsən."
+            
+            if uploaded_file:
+                system_msg += " İstifadəçi həmçinin bir şəkil yükləyib. Şəkildəki məlumatları nəzərə al."
 
             chat_completion = client.chat.completions.create(
-                messages=full_messages,
-                model="llama-3.3-70b-versatile",
+                messages=[{"role": "system", "content": system_msg}] + st.session_state.messages,
+                model=model_name,
                 temperature=0.2,
             )
-            response = chat_completion.choices[0].message.content
             
+            response = chat_completion.choices[0].message.content
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
