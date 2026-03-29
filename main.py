@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import json
 import os
-import inspect  # <--- Bura gətirdik
+import inspect
 from datetime import datetime
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
 class WildAI(nn.Module):
