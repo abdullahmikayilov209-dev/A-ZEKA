@@ -2,62 +2,79 @@ import streamlit as st
 from groq import Groq
 import base64
 
-# ... (API açarı və client hissəsi eynidir)
+# API tənzimləmələri
+try:
+    api_key = st.secrets["GROQ_API_KEY"]
+except KeyError:
+    st.error("API Key tapılmadı!")
+    st.stop()
 
-# Şəkli oxumaq üçün köməkçi funksiya (Groq Vision üçün lazımdır)
-def encode_image(image_file):
-    return base64.b64encode(image_file.getvalue()).decode('utf-8')
+client = Groq(api_key=api_key)
 
-# 1. Şəkil yükləmə "düyməsini" sual qutusunun üstünə qoyuruq
-col1, col2 = st.columns([0.1, 0.9])
-with col1:
-    # Bu düymə vizual olaraq "+" funksiyasını yerinə yetirir
-    uploaded_file = st.file_uploader("➕", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
+# --- CSS HİYLƏSİ (Düyməni qutunun yanına qoymaq üçün) ---
+st.markdown("""
+    <style>
+    /* Fayl yükləmə qutusunu kiçik bir düymə kimi göstəririk */
+    .stFileUploader {
+        min-width: 0px !important;
+        width: 45px !important;
+        position: fixed;
+        bottom: 42px;
+        left: 10%; /* Ekranın ölçüsünə görə tənzimlənir */
+        z-index: 1000;
+    }
+    .stFileUploader section {
+        padding: 0 !important;
+        border: none !important;
+    }
+    .stFileUploader label {
+        display: none !important;
+    }
+    /* Çat qutusunun özü */
+    .stChatInputContainer {
+        padding-left: 50px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# 2. Əgər şəkil seçilibsə, onu kiçik formada göstərək ki, yer tutmasın
+st.title("🇦🇿 Zəka AI")
+
+# Yaddaş
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Fayl yükləmə (O həmin "+" düyməsi rolunda)
+uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'], key="plus_button")
+
 if uploaded_file:
-    st.image(uploaded_file, width=100, caption="Yükləndi")
+    st.sidebar.image(uploaded_file, caption="Yüklənən şəkil", width=150)
+    st.sidebar.success("Şəkil hazırdır!")
 
-# 3. Sual qutusu
-if prompt := st.chat_input("Sualınızı yazın..."):
+# Mesajlar
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        if message["role"] == "user":
+            st.text(message["content"])
+        else:
+            st.markdown(message["content"])
+
+# Sual qutusu
+if prompt := st.chat_input("Sualınızı bura yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
     with st.chat_message("user"):
         st.text(prompt)
 
     with st.chat_message("assistant"):
         try:
-            # ƏGƏR ŞƏKİL VARSA: Vision modelini işə salırıq
-            if uploaded_file:
-                base64_image = encode_image(uploaded_file)
-                model_to_use = "llama-3.2-11b-vision-preview" # Şəkli görən model
-                
-                messages_with_image = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
-                            }
-                        ]
-                    }
-                ]
-            else:
-                # Şəkil yoxdursa, normal 70B modeli ilə davam edirik
-                model_to_use = "llama-3.3-70b-versatile"
-                messages_with_image = st.session_state.messages
-
-            chat_completion = client.chat.completions.create(
-                messages=messages_with_image,
-                model=model_to_use,
-                temperature=0.2,
-            )
+            # Əgər şəkil varsa Vision modelini işlədirik
+            model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
             
+            chat_completion = client.chat.completions.create(
+                messages=[{"role": "system", "content": "Sən Zəka AI-san. Azərbaycan dilində cavab ver."}] + st.session_state.messages,
+                model=model,
+            )
             response = chat_completion.choices[0].message.content
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
-            
         except Exception as e:
-            st.error(f"Xəta: {str(e)}")
+            st.error(f"Xəta: {e}")
