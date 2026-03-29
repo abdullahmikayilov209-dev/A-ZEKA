@@ -17,37 +17,33 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "system", 
-            "content": """Sən səmimi və ağıllı bir köməkçisən. Adın Zəka AI-dır. 
-            TƏLİMATLAR:
-            1. Riyazi düsturlar görəndə onları sadələşdir və addım-addım izah et.
-            2. Cavablarında LaTeX istifadə edirsənsə, yalnız tək dollar ($) işarəsi işlət.
-            3. Həmişə Azərbaycan dilində danış.
-            4. Salamlaşanda qısa ol."""
+            "content": """Sən Zəka AI-san. Səmimi və ağıllı köməkçisən.
+            Riyazi ifadələri və kəsrləri izah edərkən onları kod bloku içində (```) göstər ki, oxunması rahat olsun.
+            Həmişə Azərbaycan dilində cavab ver."""
         }
     ]
 
-# Mesajları göstərərkən LaTeX problemini həll edirik
+# Mesajları göstərərkən xüsusi tənzimləmə
 for message in st.session_state.messages:
     if message["role"] != "system":
         with st.chat_message(message["role"]):
-            # Kod blokları və ya xüsusi simvolların xarab olmaması üçün
-            st.markdown(message["content"])
+            # Əgər mətndə çoxlu riyazi simvol varsa, onu qarışdırmadan göstər
+            st.write(message["content"])
 
 if prompt := st.chat_input("Sualınızı bura yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        # Sənin yazdığın o uzun kəsri olduğu kimi göstərmək üçün st.text istifadə edirik
+        st.text(prompt) 
 
     with st.chat_message("assistant"):
         try:
             chat_completion = client.chat.completions.create(
                 messages=st.session_state.messages,
                 model="llama-3.3-70b-versatile",
-                temperature=0.3, # Riyazi misallarda daha dəqiq olması üçün temperaturu saldıq
+                temperature=0.2, # Maksimum dəqiqlik
             )
             response = chat_completion.choices[0].message.content
-            
-            # Cavabı göstər
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
