@@ -1,69 +1,78 @@
 import streamlit as st
 from groq import Groq
 
-# API açarını Secrets-dən götürürük
+# API setup
 try:
     api_key = st.secrets["GROQ_API_KEY"]
-except KeyError:
-    st.error("Xəta: GROQ_API_KEY tapılmadı!")
+    client = Groq(api_key=api_key)
+except:
+    st.error("API Key tapılmadı!")
     st.stop()
 
-client = Groq(api_key=api_key)
-
-# --- BÜTÜN "ARTIQLIQLARI" SİLƏN VƏ "+" QOYAN CSS ---
+# --- GEMINI ÜSLUBU: BÖYÜK QUTUNU SİLİB "+" QOYAN CSS ---
 st.markdown("""
     <style>
-    /* 1. O böyük "Drag and Drop" yazısını və çərçivəni tamamilə yox edirik */
+    /* 1. Sual qutusunu (Chat Input) tənzimləyirik */
+    [data-testid="stChatInput"] {
+        padding-left: 50px !important;
+    }
+    
+    [data-testid="stChatInput"] textarea {
+        border-radius: 25px !important;
+        padding-left: 45px !important;
+        background-color: #ffffff !important;
+    }
+
+    /* 2. O böyük 'Drag and Drop' qutusunu tamamilə 'öldürürük' */
+    [data-testid="stFileUploader"] {
+        position: fixed;
+        bottom: 34px; /* Qutunun hündürlüyünə tam uyğun */
+        left: 42px;   /* Sol tərəfə yapışdır */
+        width: 35px !important;
+        z-index: 99999;
+        padding: 0 !important;
+    }
+
+    /* Bütün çərçivələri və yazıları gizlət */
     [data-testid="stFileUploader"] section {
         padding: 0 !important;
         border: none !important;
-        background-color: transparent !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        background: transparent !important;
     }
     
-    /* 2. "Browse files" yazısını və digər yazıları gizlədirik */
     [data-testid="stFileUploader"] label, 
     [data-testid="stFileUploader"] small,
-    [data-testid="text-ui-internal"] {
+    [data-testid="stFileUploaderText"] {
         display: none !important;
     }
 
-    /* 3. Düyməni balaca "+" şəklinə salırıq və sual qutusunun içinə (sola) qoyuruq */
-    [data-testid="stFileUploader"] {
-        position: fixed;
-        bottom: 34px; /* Qutunun tam mərkəzi */
-        left: 55px;   /* Sol künc */
-        width: 30px !important;
-        z-index: 10000;
-    }
-
+    /* 3. 'Browse files' düyməsini balaca '+' edirik */
     [data-testid="stFileUploader"] button {
+        border-radius: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
         background-color: transparent !important;
         border: none !important;
-        color: #5f6368 !important;
-        font-size: 24px !important;
-        font-weight: 300 !important;
-        width: 30px !important;
-        height: 30px !important;
-        padding: 0 !important;
+        color: #5f6368 !important; /* Gemini rəngi */
+        font-size: 30px !important;
+        font-weight: 200 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        box-shadow: none !important;
         margin: 0 !important;
     }
 
-    /* Düymənin içinə "+" yazısını məcburi qoyuruq */
+    /* Düymənin içinə məcburi '+' qoyuruq */
     [data-testid="stFileUploader"] button::after {
         content: "+" !important;
         visibility: visible;
+        position: absolute;
     }
     
+    /* Orijinal yazını gizlət */
     [data-testid="stFileUploader"] button div {
-        display: none !important; /* Orijinal yazını gizlət */
-    }
-
-    /* 4. Sual qutusundakı yazını bir az sağa çəkirik ki, "+" ilə üst-üstə düşməsin */
-    .stChatInputContainer textarea {
-        padding-left: 45px !important;
+        display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -81,11 +90,12 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-# Bu həmin "+" düyməsidir. Artıq o böyük qutu görünməyəcək.
+# BU O BALACA "+" DÜYMƏSİDİR
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    st.toast("Şəkil yükləndi!", icon="📸")
+    st.sidebar.image(uploaded_file, caption="Yüklənən şəkil", width=100)
+    st.toast("Şəkil hazırdır!")
 
 # Sual qutusu
 if prompt := st.chat_input("Sualınızı bura yazın..."):
@@ -94,9 +104,11 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
         st.text(prompt)
 
     with st.chat_message("assistant"):
+        # Şəkil varsa Vision modeli, yoxsa normal
         model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
+        
         chat_completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": "Sən Zəka AI-san."}] + st.session_state.messages,
+            messages=[{"role": "system", "content": "Sən səmimi Zəka AI-san."}] + st.session_state.messages,
             model=model,
         )
         response = chat_completion.choices[0].message.content
