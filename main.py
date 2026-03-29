@@ -71,3 +71,41 @@ if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
 # ###########################################################
 # Sətir 65: Sistem optimizasiyası davam edir...
 # Sətir 66: Gələcək burada qurulur...
+with st.spinner("Riyazi neyronlar aktivləşdirilir..."):
+            soru = prompt.lower()
+            
+            # --- RİYAZİ HESABLAMA MƏNTİQİ ---
+            try:
+                # Əgər sualda rəqəmlər və riyazi işarələr (+, -, *, /, **) varsa
+                if any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/"):
+                    # Təhlükəli simvolları təmizləyirik və hesablayırıq
+                    if "x" in soru: soru = soru.replace("x", "*") # 'x' işarəsini '*' ilə əvəz et
+                    expression = "".join(c for c in soru if c in "0123456789+-*/.**()")
+                    netice = eval(expression)
+                    cavab = f"Riyazi analiz tamamlandı. Nəticə: **{netice}**"
+                
+                # --- RİYAZİ TERMİNLƏR VƏ CAVABLAR ---
+                elif "pifaqor" in soru:
+                    cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda katetlərin kvadratları cəmi hipotenuzun kvadratına bərabərdir: $a^2 + b^2 = c^2$."
+                elif "diskriminant" in soru:
+                    cavab = "Kvadrat tənliklər üçün diskriminant düsturu: $D = b^2 - 4ac$."
+                elif "törəmə" in soru or "toreme" in soru:
+                    cavab = "Törəmə funksiyanın dəyişmə sürətini göstərir. Məsələn, $x^n$-in törəməsi $nx^{n-1}$ olur."
+                elif "inteqral" in soru:
+                    cavab = "İnteqral törəmənin tərsidir və əsasən əyri altındakı sahəni hesablamaq üçün istifadə olunur."
+                elif "pi" in soru or "π" in soru:
+                    cavab = "Pi (π) ədədi çevrənin uzunluğunun onun diametrinə olan nisbətidir. Təxminən: **3.14159...**"
+                
+                # --- STANDART CAVABLAR ---
+                elif "salam" in soru:
+                    cavab = "Salam! Mən A-Zeka. Riyazi hesablamalar və elmi analizlər üçün hazıram."
+                elif "kimsən" in soru:
+                    cavab = "Mən 10,000 sətirlik riyazi alqoritmlərdən güc alan Süni İntellektəm."
+                else:
+                    cavab = f"'{prompt}' sualını analiz etdim. Mənə bir riyazi misal ver (məsələn: 25 * 4), onu dərhal həll edim!"
+            
+            except Exception:
+                cavab = "Bağışlayın, bu riyazi ifadəni tam anlaya bilmədim. Zəhmət olmasa rəqəmləri və işarələri ( +, -, *, / ) dəqiq yazın."
+
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
