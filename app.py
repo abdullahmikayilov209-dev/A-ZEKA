@@ -96,3 +96,44 @@ if prompt := st.chat_input("Hər hansı bir elmi sual yaz..."):
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+            # --- RİYAZİYYATIN QIZIL BAZASI (Ultra Geniş) ---
+            if any(x in soru for x in ["viyet", "heron", "pifaqor", "diskriminant", "törəmə", "inteqral", "loqarifma", "limit", "toreme", "sinus", "kosinus", "ehtimal", "proqresiya", "faiz", "çevrə", "həcm"]):
+                
+                # 1. Cəbr və Tənliklər
+                if "viyet" in soru:
+                    cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində $x_1+x_2 = -b/a$ və $x_1 \cdot x_2 = c/a$ olur."
+                elif "diskriminant" in soru:
+                    cavab = "Kvadrat tənlik: $D = b^2 - 4ac$. $D > 0$ (2 kök), $D = 0$ (1 kök), $D < 0$ (kök yoxdur)."
+                elif "loqarifma" in soru:
+                    cavab = "Loqarifma: $\log_a b = c \implies a^c = b$. Əsas xassə: $\log_a (bc) = \log_a b + \log_a c$."
+                
+                # 2. Həndəsə (Sahə və Perimetr)
+                elif "heron" in soru:
+                    cavab = "Heron düsturu: $S = \\sqrt{p(p-a)(p-b)(p-c)}$. Burada $p = (a+b+c)/2$ (yarımperimetr)."
+                elif "pifaqor" in soru:
+                    cavab = "Pifaqor: Düzbucaqlı üçbucaqda $a^2 + b^2 = c^2$."
+                elif "çevrə" in soru or "cevre" in soru:
+                    cavab = "Çevrənin uzunluğu: $L = 2\pi r$. Dairənin sahəsi: $S = \pi r^2$."
+                elif "həcm" in soru:
+                    cavab = "Kürənin həcmi: $V = \\frac{4}{3}\pi r^3$. Silindrin həcmi: $V = S_{oturacaq} \cdot h$."
+
+                # 3. Triqonometriya
+                elif "sinus" in soru or "kosinus" in soru:
+                    cavab = "Əsas triqonometrik eynilik: $\sin^2 x + \cos^2 x = 1$. Sinuslar teoremi: $a/\sin A = b/\sin B = c/\sin C = 2R$."
+                
+                # 4. Analiz və Ardıcıllıqlar
+                elif "törəmə" in soru or "toreme" in soru:
+                    cavab = "Törəmə cədvəli: $(x^n)' = nx^{n-1}$, $(\sin x)' = \cos x$, $(\cos x)' = -\sin x$, $(e^x)' = e^x$."
+                elif "inteqral" in soru:
+                    cavab = "Qeyri-müəyyən inteqral: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$."
+                elif "proqresiya" in soru:
+                    cavab = "Ədədi proqresiya: $a_n = a_1 + (n-1)d$. Həndəsi proqresiya: $b_n = b_1 \cdot q^{n-1}$."
+
+                # 5. Ehtimal və Faiz
+                elif "ehtimal" in soru:
+                    cavab = "Ehtimalın klassik tərifi: $P(A) = m/n$ (əlverişli hallar / mümkün hallar)."
+                elif "faiz" in soru:
+                    cavab = "Ədədin faizinin tapılması: $a \cdot p / 100$. Faiz artımı düsturu: $S_n = S_0(1 + p/100)^n$."
+                
+                else:
+                    cavab = "Riyaziyyatın bu dərinliyini Abdullah bəy mənə 100% öyrədib. Sualını bir az dəqiqləşdir, həll edim!"
