@@ -110,7 +110,8 @@ with st.spinner("Riyazi neyronlar aktivləşdirilir..."):
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
 # 1. İstifadəçi girişini emal edirik
-    soru = prompt.lower()
+   if prompt := st.chat_input("Yazın..."):
+    soru = prompt.lower() # DÜZ! Çünki if-dən 4 boşluq sağdadır.
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
