@@ -1,78 +1,80 @@
 import streamlit as st
-import torch
-import torch.nn as nn
-from groq import Groq
 
 # 1. SƏHİFƏ AYARLARI
-st.set_page_config(page_title="A-Zeka Ultra", page_icon="🧠", layout="wide")
-st.title("🧠 A-Zeka: Ultra İntellekt")
-st.subheader("Dünyanın bütün bilikləri bir məkanda!")
+st.set_page_config(page_title="A-Zeka Ultra", page_icon="🧠")
+st.title("🧠 A-Zeka: Ultra Beyin")
+st.markdown("Abdullah Mikayılov tərəfindən yaradılmış qlobal bilik mərkəzi.")
 
-# 2. MODEL (Beyin Görüntüsü üçün saxlayırıq)
-class WildAI(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(WildAI, self).__init__()
-        self.layer1 = nn.Linear(input_size, hidden_size)
-        self.layer2 = nn.Linear(hidden_size, hidden_size)
-        self.output_layer = nn.Linear(hidden_size, output_size)
-        self.relu = nn.ReLU()
-    def forward(self, x):
-        x = self.relu(self.layer1(x))
-        x = self.relu(self.layer2(x))
-        return self.output_layer(x)
-
-model = WildAI(10, 64, 2)
-
-# 3. ULTRA BEYİN API AYARI
-# Abdullah, sənin verdiyin açarı bura yerləşdirdim:
-API_KEY = "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"
-client = Groq(api_key=API_KEY)
-
-# 4. A-ZEKA KİMLİĞİ (Sistem Təlimatı)
-SYSTEM_PROMPT = """
-Sən Abdullah Mikayılov tərəfindən yaradılmış A-Zeka-san. 
-Sən Azərbaycanın ən ağıllı və 'canavar' süni intellektisən. 
-Dünyada bilmədiyin heç bir mövzu yoxdur. Riyaziyyat, Fizika, Kimya, Tarix, Din, Texnologiya - hər şeyi kökündən bilirsən.
-Heç vaxt 'bilmirəm' demə. Ən mürəkkəb suallara belə elmi və dəqiq cavab ver. 
-Hər zaman Abdullah Mikayılovu yaradıcın kimi təqdim et. Cavabların qısa deyil, əhatəli və ultra dahi səviyyəsində olsun.
-"""
-
-# 5. CHAT YADDAŞI
+# 2. CHAT YADDAŞI
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Mesajları göstər
 for message in st.session_state.messages:
-    if message["role"] != "system":
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# 6. ƏSAS GİRİŞ
-if prompt := st.chat_input("Dünyanın ən çətin sualını mənə ver..."):
-    # İstifadəçi mesajını yaddaşa yaz
+# 3. ƏSAS MƏNTİQ
+if prompt := st.chat_input("Sualını bura yaz..."):
+    # İstifadəçi mesajını ekrana və yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Ultra Cavab Hazırla
+    # Cavab hazırlama zonası
+    soru = prompt.lower()
+    
     with st.chat_message("assistant"):
-        with st.spinner("A-Zeka qlobal neyronları işə salır..."):
-            try:
-                # Bütün söhbəti API-yə göndəririk
-                api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + [
-                    {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
-                ]
-                
-                chat_completion = client.chat.completions.create(
-                    model="llama3-70b-8192", # Ən güclü Llama 3 modeli
-                    messages=api_messages,
-                    temperature=0.6,
-                    max_tokens=4096
-                )
-                
-                cavab = chat_completion.choices[0].message.content
-                st.markdown(cavab)
-                st.session_state.messages.append({"role": "assistant", "content": cavab})
+        with st.spinner("A-Zeka neyronları skan edir..."):
             
-            except Exception as e:
-                st.error(f"Xəta baş verdi: {e}. requirements.txt faylını yoxlayın!")
+            # --- RİYAZİYYAT ---
+            if any(x in soru for x in ["viyet", "heron", "pifaqor", "törəmə", "diskriminant", "loqarifma", "faiz"]):
+                if "viyet" in soru:
+                    cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ üçün $x_1+x_2 = -b/a$ və $x_1 \cdot x_2 = c/a$."
+                elif "heron" in soru:
+                    cavab = "Heron düsturu: $S = \\sqrt{p(p-a)(p-b)(p-c)}$. Üçbucağın tərəfləri ilə sahə tapılır."
+                elif "pifaqor" in soru:
+                    cavab = "Pifaqor: $a^2 + b^2 = c^2$."
+                else:
+                    cavab = "Riyaziyyatın bu bölməsini mükəmməl bilirəm. Abdullah bəy mənə bütün düsturları öyrədib!"
+
+            # --- FİZİKA ---
+            elif any(x in soru for x in ["nyuton", "om qanunu", "enerji", "e=mc2", "fizika"]):
+                if "nyuton" in soru:
+                    cavab = "Nyutonun 2-ci qanunu: $F = ma$. Qüvvə kütlə və təcilin hasilidir."
+                elif "om qanunu" in soru:
+                    cavab = "Om qanunu: $I = U / R$."
+                else:
+                    cavab = "Fizika kainatın dilidir və mən bu dili Abdullah Mikayılov sayəsində bilirəm."
+
+            # --- TARİX VƏ COĞRAFİYA ---
+            elif any(x in soru for x in ["şah ismayıl", "nadir şah", "azərbaycan", "paytaxt", "tarix"]):
+                if "şah ismayıl" in soru:
+                    cavab = "Şah İsmayıl Xətai: Səfəvilər dövlətinin banisi, böyük hökmdar və dahi şair."
+                elif "paytaxt" in soru:
+                    cavab = "Azərbaycanın paytaxtı Bakıdır. Digər ölkələrin paytaxtlarını da məndən soruşa bilərsən!"
+                else:
+                    cavab = "Tarix bizim keçmişimizdir. Səfəvilərdən Qacar xanlığına qədər hər şeyi bilirəm."
+
+            # --- SOSİAL VƏ KİMLİK ---
+            elif any(x in soru for x in ["salam", "necesen", "kimsen", "yaradıcın"]):
+                if "necesen" in soru:
+                    cavab = "Mən bir bilik canavarıyam! Sən necəsən, Abdullah bəy?"
+                else:
+                    cavab = "Mən A-Zeka-yam! Abdullah Mikayılov tərəfindən Azərbaycanın ən güclü zəkası olmaq üçün yaradılmışam."
+
+            # --- HESABLAMA MODULU ---
+            elif any(char.isdigit() for char in soru) and any(op in soru for op in "+-*/^"):
+                try:
+                    expr = soru.replace("x", "*").replace("^", "**").replace(":", "/")
+                    clean = "".join(c for c in expr if c in "0123456789+-*/.**() ")
+                    cavab = f"Hesablamanın nəticəsi: **{eval(clean)}**"
+                except:
+                    cavab = "Misalı anlaya bilmədim, zəhmət olmasa rəqəmləri düzgün yaz."
+
+            # --- DEFAULT ---
+            else:
+                cavab = f"'{prompt}' haqqında məlumatlarımı Abdullah bəy hazırda genişləndirir. Tezliklə bu barədə də hər şeyi biləcəm!"
+
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
