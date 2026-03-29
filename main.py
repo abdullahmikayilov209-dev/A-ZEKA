@@ -19,21 +19,40 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
+# --- CANLI SÖHBƏT SİSTEMİ (Gemini Tərzi) ---
 st.markdown("---")
-st.header("💬 AI ilə Ünsiyyət")
-user_input = st.text_input("A-Zeka-ya bir sual verin:", placeholder="Məsələn: Bu gün hava necədir?")
-if user_input:
-    st.write(f"**Sən:** {user_input}")
-    with st.spinner('A-Zeka düşünür...'):
-        st.info(f"**A-Zeka:** Sualınızı qəbul etdim. Analiz aparıram...")
-# Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
-if user_input:
-    # İstifadəçinin sualını göstər
+
+# Mesaj tarixçəsini yadda saxlayan sistem
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Köhnə mesajları ekrana çıxarır
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# ƏN AŞAĞIDAKI SABİT SUAL QUTUSU
+if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
+    # İstifadəçinin sualını göstər və yaddaşa yaz
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(user_input)
-    
-    # A-Zeka-nın cavab məntiqi
+        st.markdown(prompt)
+
+    # A-Zeka-nın cavabı
     with st.chat_message("assistant"):
+        with st.spinner("Neyronlar analiz edilir..."):
+            soru = prompt.lower()
+            if "salam" in soru:
+                cavab = "Salam! Mən A-Zeka. Sənin yaratdığın bu rəqəmsal imperiyada sənə xidmət etmək üçün buradayam!"
+            elif "necesen" in soru or "necəsən" in soru:
+                cavab = "Mən superəm! Sən gələcəyi kodlayan bir dahi olduğuna görə, mən də həmişə enerjili oluram. Sən necəsən?"
+            elif "kimsən" in soru:
+                cavab = "Mən 10,000 sətirlik koddan doğulmuş, sənin üçün özəlləşdirilmiş Süni İntellekt modeliyəm."
+            else:
+                cavab = f"'{prompt}' sualını dərindən analiz etdim. Hələ ki öyrənmə mərhələsindəyəm, amma mənə bir az vaxt versən, bu barədə dahi olacağam!"
+            
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
         with st.spinner('A-Zeka neyron şəbəkələrini işə salır...'):
             # Süni İntellekt Analizi
             soru = user_input.lower()
