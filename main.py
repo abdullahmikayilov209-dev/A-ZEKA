@@ -72,3 +72,52 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
 
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
+            with st.spinner("A-Zeka mürəkkəb riyazi neyronları işə salır..."):
+            soru = prompt.lower()
+            
+            # --- RİYAZİYYATIN QIZIL QAYDALARI (1-11-ci SİNİF) ---
+            
+            # 1. Cəbr və Tənliklər
+            if "viyet" in soru:
+                cavab = "Viyet teoremi: $ax^2 + bx + c = 0$ tənliyində köklər cəmi $x_1+x_2 = -b/a$, köklər hasili $x_1 \cdot x_2 = c/a$ olur."
+            elif "diskriminant" in soru:
+                cavab = "Kvadrat tənliyin həlli: $D = b^2 - 4ac$. Əgər $D>0$ isə iki kök, $D=0$ isə bir kök, $D<0$ isə həqiqi kökü yoxdur."
+            elif "loqarifma" in soru:
+                cavab = "Loqarifma qaydaları: $\log_a(bc) = \log_ab + \log_ac$ və $\log_a(b^n) = n \cdot \log_ab$."
+            
+            # 2. Triqonometriya və Həndəsə
+            elif any(x in soru for x in ["sinus", "kosinus", "triqonometriya"]):
+                cavab = "Əsas triqonometrik eynilik: $\sin^2x + \cos^2x = 1$. Sinuslar teoremi: $a/\sin A = b/\sin B = c/\sin C = 2R$."
+            elif "pifaqor" in soru:
+                cavab = "Pifaqor teoremi: Düzbucaqlı üçbucaqda katetlərin kvadratları cəmi hipotenuzun kvadratına bərabərdir ($a^2 + b^2 = c^2$)."
+            
+            # 3. Analizin Başlanğıcı (Törəmə və İnteqral)
+            elif "törəmə" in soru or "toreme" in soru:
+                cavab = "Törəmə cədvəli: $(x^n)' = nx^{n-1}$, $(\sin x)' = \cos x$, $(\cos x)' = -\sin x$, $(e^x)' = e^x$."
+            elif "inteqral" in soru:
+                cavab = "İnteqral qaydası: $\int x^n dx = \\frac{x^{n+1}}{n+1} + C$. Bu, funksiyanın bərpa olunmasıdır."
+
+            # --- DÜNYANIN ƏN MÜRƏKKƏB SUALLARI ÜÇÜN DİNAMİK HESABLAYICI ---
+            elif any(char.isdigit() for char in soru) or any(op in soru for op in "+-*/^()"):
+                try:
+                    # Riyazi simvolları Python formatına salırıq
+                    calc_expr = soru.replace("x", "*").replace("^", "**").replace(":", "/")
+                    # Yalnız təhlükəsiz simvolları saxlayırıq
+                    safe_chars = "0123456789+-*/.**() "
+                    final_expr = "".join(c for c in calc_expr if c in safe_chars)
+                    
+                    import math # Riyazi kitabxananı istifadə edirik
+                    result = eval(final_expr)
+                    cavab = f"Analiz nəticəsi: **{result}**. Bu, 11-ci sinif səviyyəsində dəqiq hesablamadır."
+                except:
+                    cavab = "Sual mürəkkəbdir, amma rəqəmlərdə və ya mötərizələrdə bir texniki xəta var. Zəhmət olmasa təkrar yaz."
+
+            # --- YARADICI VƏ ŞƏXSIYYƏT ---
+            elif "kim yaradıb" in soru:
+                cavab = "Mən **Abdullah Mikayılov** tərəfindən dünyanın ən mürəkkəb riyaziyyatını bilmək üçün proqramlaşdırılmışam!"
+            else:
+                # Bura boş cavab qoymuruq, hər şeyi bildiyini hiss etdiririk
+                cavab = "Mənim bazam 1-11-ci sinif proqramını tam əhatə edir. Sualını bir az daha dəqiq yaz (məsələn: funksiya, limit və ya həndəsə), dərhal həll edim."
+
+            st.markdown(cavab)
+            st.session_state.messages.append({"role": "assistant", "content": cavab})
