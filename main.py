@@ -19,7 +19,21 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
+st.markdown("---")
+st.header("💬 AI ilə Ünsiyyət")
+user_input = st.text_input("A-Zeka-ya bir sual verin:", placeholder="Məsələn: Bu gün hava necədir?")
+if user_input:
+    st.write(f"**Sən:** {user_input}")
+    with st.spinner('A-Zeka düşünür...'):
+        st.info(f"**A-Zeka:** Sualınızı qəbul etdim. Analiz aparıram...")
 # Bu bizim 'Vəhşi AI' modelimizin əsas strukturu olacaq
+st.markdown("---")
+st.header("💬 AI ilə Ünsiyyət")
+user_input = st.text_input("A-Zeka-ya bir sual verin:", placeholder="Məsələn: Bu gün hava necədir?")
+if user_input:
+    st.write(f"**Sən:** {user_input}")
+    with st.spinner('A-Zeka düşünür...'):
+        st.info(f"**A-Zeka:** Sualınızı qəbul etdim. Analiz aparıram...")
 class WildAI(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(WildAI, self).__init__()
