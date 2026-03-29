@@ -9271,7 +9271,7 @@ class WildNeuralLink:
             return "INTENT_DETECTED: ACTION_REQUIRED"
         return "STATE: MEDITATIVE_OR_IDLE"
 
-    def establish_bi-directional_link(self):
+        def establish_bi_directional_link(self):
         """Beyin və AI arasında iki tərəfli məlumat ötürülməsini aktivləşdirir"""
         self.sync_status = True
         return f"SYNC_ESTABLISHED: Latency={random.randint(1, 5)}ms"
