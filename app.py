@@ -2,61 +2,79 @@ import streamlit as st
 from groq import Groq
 import base64
 
-# API tənzimləmələri
+# API açarını Secrets-dən götürürük
 try:
     api_key = st.secrets["GROQ_API_KEY"]
 except KeyError:
-    st.error("API Key tapılmadı!")
+    st.error("Xəta: GROQ_API_KEY tapılmadı!")
     st.stop()
 
 client = Groq(api_key=api_key)
 
-# --- CSS HİYLƏSİ (Düyməni qutunun yanına qoymaq üçün) ---
+# --- GÖZƏL DİZAYN ÜÇÜN CSS ---
 st.markdown("""
     <style>
-    /* Fayl yükləmə qutusunu kiçik bir düymə kimi göstəririk */
+    /* Fayl yükləmə düyməsini balaca "+" şəklinə salırıq */
     .stFileUploader {
-        min-width: 0px !important;
-        width: 45px !important;
         position: fixed;
-        bottom: 42px;
-        left: 10%; /* Ekranın ölçüsünə görə tənzimlənir */
-        z-index: 1000;
+        bottom: 38px;
+        left: 20px;
+        width: 45px !important;
+        z-index: 9999;
     }
     .stFileUploader section {
         padding: 0 !important;
         border: none !important;
+        background: none !important;
     }
     .stFileUploader label {
         display: none !important;
     }
-    /* Çat qutusunun özü */
+    /* "Browse files" yazısını gizlədib yerinə "+" qoyuruq */
+    .stFileUploader button {
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+        background-color: #f0f2f6 !important;
+        border: 1px solid #ccc !important;
+        color: #555 !important;
+        font-size: 24px !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .stFileUploader button::after {
+        content: "+";
+    }
+    .stFileUploader button div {
+        display: none;
+    }
+    
+    /* Çat girişini düyməyə görə bir az sağa çəkirik */
     .stChatInputContainer {
-        padding-left: 50px !important;
+        padding-left: 55px !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("🇦🇿 Zəka AI")
 
-# Yaddaş
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Fayl yükləmə (O həmin "+" düyməsi rolunda)
-uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'], key="plus_button")
-
-if uploaded_file:
-    st.sidebar.image(uploaded_file, caption="Yüklənən şəkil", width=150)
-    st.sidebar.success("Şəkil hazırdır!")
-
-# Mesajlar
+# Mesajları göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "user":
             st.text(message["content"])
         else:
             st.markdown(message["content"])
+
+# "+" Düyməsi (Fayl yükləmə)
+uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
+
+if uploaded_file:
+    st.sidebar.image(uploaded_file, caption="Yükləndi", width=150)
 
 # Sual qutusu
 if prompt := st.chat_input("Sualınızı bura yazın..."):
@@ -66,11 +84,11 @@ if prompt := st.chat_input("Sualınızı bura yazın..."):
 
     with st.chat_message("assistant"):
         try:
-            # Əgər şəkil varsa Vision modelini işlədirik
+            # Şəkil varsa Vision modelinə keçir
             model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
             
             chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Sən Zəka AI-san. Azərbaycan dilində cavab ver."}] + st.session_state.messages,
+                messages=[{"role": "system", "content": "Sən Zəka AI-san. Səmimi ol və Azərbaycan dilində cavab ver."}] + st.session_state.messages,
                 model=model,
             )
             response = chat_completion.choices[0].message.content
