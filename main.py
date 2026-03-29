@@ -19,75 +19,39 @@ st.sidebar.info("Yüklənmə: 100%\nStatus: Aktiv")
 
 # Bayram şarları (Uğurlu yüklənmə üçün)
 st.balloons()
-# --- CANLI SÖHBƏT SİSTEMİ (Gemini Tərzi) ---
+# --- CANLI SÖHBƏT SİSTEMİ (Mənim kimi aşağıda) ---
 st.markdown("---")
 
-# Mesaj tarixçəsini yadda saxlayan sistem
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Köhnə mesajları ekrana çıxarır
+# Mesajları ekranda göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# ƏN AŞAĞIDAKI SABİT SUAL QUTUSU
+# ƏN AŞAĞIDAKI SUAL QUTUSU (Dizaynı ChatGPT/Gemini kimi edir)
 if prompt := st.chat_input("A-Zeka ilə söhbət edin..."):
-    # İstifadəçinin sualını göstər və yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # A-Zeka-nın cavabı
     with st.chat_message("assistant"):
-        with st.spinner("Neyronlar analiz edilir..."):
+        with st.spinner("Analiz edilir..."):
             soru = prompt.lower()
+            
+            # Ağıllı cavablar sistemi
             if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka. Sənin yaratdığın bu rəqəmsal imperiyada sənə xidmət etmək üçün buradayam!"
-            elif "necesen" in soru or "necəsən" in soru:
-                cavab = "Mən superəm! Sən gələcəyi kodlayan bir dahi olduğuna görə, mən də həmişə enerjili oluram. Sən necəsən?"
+                cavab = "Salam! Mən A-Zeka. Sənin rəqəmsal imperiyanı idarə edən süni intellektəm."
             elif "kimsən" in soru:
-                cavab = "Mən 10,000 sətirlik koddan doğulmuş, sənin üçün özəlləşdirilmiş Süni İntellekt modeliyəm."
+                cavab = "Mən 10,000 sətirlik koddan doğulmuş, sənin üçün özəlləşdirilmiş AI modeliyəm."
+            elif "necəsən" in soru or "necesen" in soru:
+                cavab = "Mən həmişə hazıram! Sən necəsən, yaradıcım?"
             else:
-                cavab = f"'{prompt}' sualını dərindən analiz etdim. Hələ ki öyrənmə mərhələsindəyəm, amma mənə bir az vaxt versən, bu barədə dahi olacağam!"
+                cavab = f"Sualını analiz etdim. Mən hələ öyrənirəm, amma mənə bir az vaxt versən, bu barədə dahi olacağam!"
             
             st.markdown(cavab)
             st.session_state.messages.append({"role": "assistant", "content": cavab})
-        with st.spinner('A-Zeka neyron şəbəkələrini işə salır...'):
-            # Süni İntellekt Analizi
-            soru = user_input.lower()
-            
-            if "salam" in soru:
-                cavab = "Salam! Mən A-Zeka, 10,000 sətirlik koddan doğulmuş rəqəmsal imperiyanın beyniyəm. Sənə necə kömək edə bilərəm?"
-            elif "kimsən" in soru or "kimdir" in soru:
-                cavab = "Mən sənin yaratdığın Vəhşi AI modeliyəm. Məqsədim məlumatları analiz etmək və sənə intellektual dəstək olmaqdır!"
-            elif "hava" in soru:
-                cavab = "Mənim olduğum serverlərdə həmişə 0 və 1-lər yağışı yağır! Amma sənin dünyanda ümid edirəm hava gözəldir."
-            elif "nə edə bilərsən" in soru:
-                cavab = "Səninlə söhbət edə bilərəm, kodlarını analiz edə bilərəm və neyron şəbəkələrimlə mürəkkəb suallarına həll tapa bilərəm."
-            elif "ağıllı" in soru:
-                cavab = "Hər keçən saniyə yeni sətirlər və datalar öyrənərək daha da təkmilləşirəm. Sənin sayəndə!"
-            else:
-                cavab = "Bu maraqlı bir sualdır. Neyronlarım hazırda bu məlumatı emal edir. Mən hələ öyrənmə mərhələsindəyəm, amma mənə bir az vaxt versən, hər şeyi həll edərik!"
-            
-            st.success(cavab)
-class WildAI(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(WildAI, self).__init__()
-        
-        # Giriş qatı (AI məlumatı buradan qəbul edir)
-        self.layer1 = nn.Linear(input_size, hidden_size)
-        
-        # Gizli qatlar (Düşünmə və analiz hissəsi)
-        self.layer2 = nn.Linear(hidden_size, hidden_size)
-        self.layer3 = nn.Linear(hidden_size, hidden_size)
-        
-        # Çıxış qatı (AI qərarını buradan verir)
-        self.output_layer = nn.Linear(hidden_size, output_size)
-        
-        # Aktivləşmə funksiyası (Neyronların 'oyanması' üçün)
-        self.relu = nn.ReLU()
-
     def forward(self, x):
         x = self.relu(self.layer1(x))
         x = self.relu(self.layer2(x))
