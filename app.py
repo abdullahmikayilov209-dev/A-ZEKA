@@ -15,16 +15,16 @@ st.set_page_config(page_title="Azərbaycanlı Sİ", page_icon="🇦🇿")
 st.title("🇦🇿 Milli Süni İntellekt")
 st.subheader("Hər şeyi bilən köməkçiniz")
 
-# Yaddaş tənzimləməsi
 if "messages" not in st.session_state:
-    # BU HİSSƏ Sİ-Nİ GÜCLƏNDİRİR:
     st.session_state.messages = [
         {
             "role": "system", 
-            "content": """Sən çox intellektual, hər sahədə dərin biliyi olan bir köməkçisən. 
-            Sənin adın 'Zəka AI'-dır. Sənə verilən bütün sualları dəqiq, elmi və ətraflı cavablandırmalısan.
-            VACİB: Həmişə Azərbaycan dilində, rəsmi və nəzakətli bir tonda cavab ver. 
-            Azərbaycan mədəniyyəti, tarixi və coğrafiyası haqqında mükəmməl biliyə sahibsən."""
+            "content": """Sən səmimi və ağıllı bir köməkçisən. Adın Zəka AI-dır. 
+            İstifadəçi salam verəndə çox rəsmi və uzun danışma. 
+            Qısa və səmimi ol, məsələn: 'Salam! Necəsən? Hansı sualın var?' kimi cavab ver. 
+            Yalnız sual soruşulanda dərin məlumat ver. Həmişə Azərbaycan dilində danış."""
+        }
+    ]
         }
     ]
 
