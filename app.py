@@ -16,7 +16,7 @@ def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # ==========================================================
-# 2. BÜTÜN ARTIQ YAZILARI (DRAG-DROP, BROWSE) SİLƏN CSS
+# 2. BÜTÜN ARTIQ YAZILARI (BROWSE FİLES+) SİLƏN CSS
 # ==========================================================
 st.markdown("""
     <style>
@@ -39,15 +39,18 @@ st.markdown("""
         background: transparent !important;
     }
     
-    /* "Drag and drop", "Browse files", "Limit" - HAMISINI GİZLƏDİRİK */
+    /* HAMISINI GİZLƏDİRİK: Drag-drop, Browse files, Limit, və s. */
     [data-testid="stFileUploader"] label, 
     [data-testid="stFileUploader"] small,
     [data-testid="stFileUploaderText"],
     [data-testid="stFileUploaderDropzoneInstructions"],
     .st-emotion-cache-1ae8k9d, 
     .st-emotion-cache-9ycgxx,
-    .st-emotion-cache-629ovp {
+    .st-emotion-cache-629ovp,
+    .st-emotion-cache-1vt4yug { /* O inadkar 'browse files' yazısı üçün əlavə class */
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
     }
 
     /* Düyməni sadəcə bir "+" simvolu edirik */
@@ -65,14 +68,17 @@ st.markdown("""
         align-items: center !important;
     }
 
-    /* Düymənin içindəki orijinal "Browse files" yazısını itiririk */
-    [data-testid="stFileUploader"] button div { display: none !important; }
+    /* Düymənin daxilindəki HƏR ŞEYİ silirik */
+    [data-testid="stFileUploader"] button * {
+        display: none !important;
+    }
     
-    /* Düyməyə xalis "+" əlavə edirik */
+    /* Düyməyə təmiz "+" əlavə edirik */
     [data-testid="stFileUploader"] button::after {
         content: "+" !important;
         visibility: visible !important;
         display: block !important;
+        position: absolute !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -102,7 +108,6 @@ prompt = st.chat_input("Dahi alimə sual ver və ya '+' vurub şəkil at...", ac
 
 if prompt:
     user_text = prompt.text
-    # Həm uploader-dən, həm də chat_input-dan gələn faylı yoxlayırıq
     active_file = None
     if prompt.files:
         active_file = prompt.files[0]
