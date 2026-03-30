@@ -16,7 +16,7 @@ def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # ==========================================================
-# 2. BÜTÜN ARTIQ YAZILARI (BROWSE FİLES+) SİLƏN CSS
+# 2. BÜTÜN ARTIQ YAZILARI (BROWSE FİLES) TAM SİLƏN CSS
 # ==========================================================
 st.markdown("""
     <style>
@@ -47,38 +47,48 @@ st.markdown("""
     .st-emotion-cache-1ae8k9d, 
     .st-emotion-cache-9ycgxx,
     .st-emotion-cache-629ovp,
-    .st-emotion-cache-1vt4yug { /* O inadkar 'browse files' yazısı üçün əlavə class */
+    .st-emotion-cache-1vt4yug,
+    .st-emotion-cache-18ni77z { 
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
+        opacity: 0 !important;
     }
 
-    /* Düyməni sadəcə bir "+" simvolu edirik */
+    /* DÜYMƏNİ VƏ İÇİNDƏKİ YAZINI SİLƏN ƏSAS HİSSƏ */
     [data-testid="stFileUploader"] button {
         background-color: transparent !important;
         border: none !important;
         color: #5f6368 !important;
-        font-size: 35px !important; 
-        font-weight: 100 !important;
+        font-size: 0px !important; /* Yazını sıfıra endiririk */
         width: 40px !important;
         height: 40px !important;
         box-shadow: none !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
+        position: relative !important;
     }
 
-    /* Düymənin daxilindəki HƏR ŞEYİ silirik */
+    /* Düymənin içindəki bütün div və span-ları (yazıları) gizlədirik */
     [data-testid="stFileUploader"] button * {
         display: none !important;
+        opacity: 0 !important;
+        font-size: 0 !important;
     }
     
-    /* Düyməyə təmiz "+" əlavə edirik */
+    /* Düyməyə təmiz "+" əlavə edirik - Bu yeganə görünən şey olacaq */
     [data-testid="stFileUploader"] button::after {
         content: "+" !important;
         visibility: visible !important;
         display: block !important;
+        font-size: 35px !important;
+        font-weight: 100 !important;
+        color: #5f6368 !important;
         position: absolute !important;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
     </style>
 """, unsafe_allow_html=True)
