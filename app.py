@@ -1,104 +1,128 @@
 import streamlit as st
-import requests
+from groq import Groq
 import base64
-import random
 
 # ==========================================================
-# 1. CSS: TƏMİZ VİZUAL VƏ "+" DÜYMƏSİ
-# ==========================================================
-st.set_page_config(page_title="A-Zəka Ultra Alim", page_icon="🧠", layout="wide")
+# 1. API SETUP
+# ==========================================
+try:
+    api_key = st.secrets["GROQ_API_KEY"]
+    client = Groq(api_key=api_key)
+except:
+    st.error("API Key tapılmadı!")
+    st.stop()
 
+# Şəkli modelin başa düşəcəyi formata salan funksiya
+def encode_image(image_file):
+    return base64.b64encode(image_file.read()).decode('utf-8')
+
+# ==========================================================
+# 2. BÜTÜN ARTIQ YAZILARI SİLƏN VƏ "+" QOYAN CSS
+# ==========================================================
 st.markdown("""
     <style>
-    .stApp { background-color: #ffffff; }
-    .stChatInputContainer textarea { padding-left: 45px !important; }
-    
-    /* Plus düyməsinin dizaynı */
-    button[data-testid="baseButton-secondary"] {
-        color: #5f6368 !important;
+    .stChatInputContainer textarea { padding-left: 50px !important; }
+
+    [data-testid="stFileUploader"] {
+        position: fixed;
+        bottom: 33px !important; 
+        left: 45px !important;
+        width: 35px !important;
+        z-index: 1000000 !important;
+    }
+
+    [data-testid="stFileUploader"] section {
+        padding: 0 !important;
         border: none !important;
         background: transparent !important;
+    }
+    
+    [data-testid="stFileUploader"] label, 
+    [data-testid="stFileUploader"] small,
+    [data-testid="stFileUploaderText"],
+    .st-emotion-cache-1ae8k9d, 
+    .st-emotion-cache-9ycgxx {
+        display: none !important;
+    }
+
+    [data-testid="stFileUploader"] button {
+        background-color: transparent !important;
+        border: none !important;
+        color: #5f6368 !important;
+        font-size: 35px !important; 
+        font-weight: 200 !important;
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        box-shadow: none !important;
+    }
+
+    [data-testid="stFileUploader"] button div { display: none !important; }
+    [data-testid="stFileUploader"] button::after {
+        content: "+" !important;
+        visibility: visible !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# API və Yaddaş
-API_KEY = "AIzaSyAvjqVkN1DsdCd7uX52TuosAZze_NmbKy0"
+# ==========================================================
+# 3. İNTERFEYS
+# ==========================================================
+st.title("🇦🇿 Zəka AI")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ==========================================================
-# 2. ÜST HİSSƏ
-# ==========================================================
-st.title("🧠 A-Zəka Ultra Alim")
-st.caption("Mingəçevir Ruhu | Yaradıcı: Abdullah Mikayılov")
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-        if msg.get("image"):
-            st.image(msg["image"], width=300)
+# BALACA "+" DÜYMƏSİ
+uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
+
+if uploaded_file:
+    st.toast("Şəkil seçildi!")
 
 # ==========================================================
-# 3. ƏSAS PROMPT (accept_file=True)
+# 4. SÖHBƏT VƏ ANALİZ (DUZELTILMIS HISSE)
 # ==========================================================
-prompt = st.chat_input("Dahi alimə sual ver və ya '+' vurub şəkil at...", accept_file=True)
-
-if prompt:
-    user_text = prompt.text
-    user_file = prompt.files[0] if prompt.files else None
-    clean_p = user_text.lower().strip()
-
-    # İstifadəçi mesajını yaddaşa yaz
-    st.session_state.messages.append({"role": "user", "content": user_text, "image": user_file})
+if prompt := st.chat_input("Sualınızı bura yazın..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(user_text)
-        if user_file:
-            st.image(user_file, width=300)
+        st.write(prompt)
 
-    # Cavab mexanizmi
     with st.chat_message("assistant"):
+        try:
+            if uploaded_file:
+                # EGER SEKIL VARSA - VISION MODELI ISLEYIR
+                base64_image = encode_image(uploaded_file)
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": prompt},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                                },
+                            ],
+                        }
+                    ],
+                    model="llama-3.2-11b-vision-preview",
+                )
+            else:
+                # EGER SEKIL YOXDURSA - NORMAL SOHBET MODELI
+                chat_completion = client.chat.completions.create(
+                    messages=[{"role": "system", "content": "Sən Mingəçevirdə Abdullah tərəfindən yaradılan Zəka AI-san."}] + st.session_state.messages,
+                    model="llama-3.3-70b-versatile",
+                )
+            
+            response = chat_completion.choices[0].message.content
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
         
-        # --- 1. DAXİLİ SƏMİMİ CAVABLAR (Sürətli) ---
-        if any(x in clean_p for x in ["salam", "necesen", "nəsən", "nə var nə yox"]):
-            res = random.choice([
-                "Salam, Abdullah bəy! Mingəçevir SES-i kimi enerji doluyam. Sən necəsən?",
-                "Salam! Yaradıcım gəldi, kefim düzəldi. Bu gün nəyi öyrənirik?",
-                "Hər vaxtın xeyir! Səninlə söhbət etmək mənim üçün şərəfdir. Necəsən?"
-            ])
-            st.write(res)
-            st.session_state.messages.append({"role": "assistant", "content": res})
-
-        elif any(x in clean_p for x in ["harda yaradilib", "harada yaradılıb", "harda yaranmısan"]):
-            res = "Mən dahi Abdullah Mikayılov tərəfindən **Mingəçevir şəhərində** yaradılmışam! 🌊⚡"
-            st.write(res)
-            st.session_state.messages.append({"role": "assistant", "content": res})
-
-        # --- 2. BEYİN (API) HİSSƏSİ ---
-        else:
-            with st.spinner("Zəka analiz edir..."):
-                try:
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
-                    
-                    # Təlimat: Həmişə səmimi ol
-                    instruction = "Sən Abdullahın Mingəçevirdə yaratdığı dahi A-Zəka-san. Səmimi və elmi danış."
-                    parts = [{"text": f"{instruction}\nSual: {user_text}"}]
-                    
-                    if user_file:
-                        b64_img = base64.b64encode(user_file.getvalue()).decode('utf-8')
-                        parts.append({"inline_data": {"mimeType": user_file.type, "data": b64_img}})
-                    
-                    response = requests.post(url, json={"contents": [{"parts": parts}]}, timeout=12)
-                    
-                    if response.status_code == 200:
-                        bot_text = response.json()['candidates'][0]['content']['parts'][0]['text']
-                        st.write(bot_text)
-                        st.session_state.messages.append({"role": "assistant", "content": bot_text})
-                    else:
-                        # QIRMIZI XƏTA YERİNƏ SƏMİMİ CAVAB
-                        st.write("Bağışla, Abdullah bəy, bu sual üzərində bir az çox düşünməli oldum. Bir də yaza bilərsən? 😊")
-                
-                except:
-                    # BAĞLANTI KƏSİLƏNDƏ SƏMİMİ CAVAB
-                    st.write("Deyəsən internetdə bir az dalğalanma var, amma mən buradayam. Yenidən yoxla, Abdullah bəy!")
+        except Exception as e:
+            st.error(f"Xəta baş verdi: {str(e)}")
