@@ -80,7 +80,7 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # BALACA "+" DÜYMƏSİ (Köhnə yerində qalır)
-uploaded_file = st.file_uploader
+uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
     st.toast("Şəkil seçildi!")
