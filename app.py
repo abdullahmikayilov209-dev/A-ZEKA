@@ -9,7 +9,7 @@ try:
     api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=api_key)
 except:
-    st.error("API Key tapılmadı!")
+    st.error("API Key tapılmadı! Secrets hissəsini yoxlayın.")
     st.stop()
 
 # İlkin tənzimləmələr
@@ -33,7 +33,6 @@ st.markdown(f"""
         color: {st.session_state.text_color} !important;
         line-height: 1.6;
     }}
-    /* Sual qutusundakı "+" düyməsini qəşəngləşdiririk */
     [data-testid="stChatInput"] {{
         border-radius: 20px;
     }}
@@ -53,57 +52,56 @@ for message in st.session_state.messages:
 # ==========================================================
 # 4. SÖHBƏT VƏ AĞILLI İDARƏETMƏ
 # ==========================================================
-prompt = st.chat_input("Mənə bir sual ver və ya əmr et...", accept_file=True)
+prompt = st.chat_input("Sual ver və ya Abdullah Mikayılov haqqında soruş...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
     user_text_lower = user_text.lower().strip() 
     active_file = prompt.files[0] if prompt.files else None
     
-    # Mesajı ekrana və yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": user_text})
     with st.chat_message("user"):
         st.write(user_text)
 
-    # --- BOTUN CAVABI ---
     with st.chat_message("assistant"):
         refresh_needed = False
         
-        # --- İNTELLEKTUAL ƏMR ANALİZİ (AI-dan qabaq yoxlanır) ---
+        # --- İNTELLEKTUAL ƏMR ANALİZİ ---
         if any(x in user_text_lower for x in ["böyüt", "boyut"]):
             st.session_state.font_size += 4
-            response = "Baş üstə, yazıları sənin üçün böyütdüm! İndi daha rahat oxunur? ✨"
+            response = "Baş üstə! Yaradıcım Abdullah Mikayılovun mənə verdiyi güclə yazıları sənin üçün böyütdüm! ✨"
             refresh_needed = True
         elif any(x in user_text_lower for x in ["kiçilt", "kicilt"]):
             st.session_state.font_size = max(12, st.session_state.font_size - 4)
-            response = "Oldu, yazıları kiçiltdim. Başqa bir istəyin var? 🤏"
+            response = "Yazılar kiçildildi. Abdullah bəyin mühəndislik dəqiqliyi ilə tənzimlədim! 🤏"
             refresh_needed = True
         elif "qırmızı" in user_text_lower:
             st.session_state.text_color = "#FF4B4B"
-            response = "Rəngi qırmızıya çevirdim. Diqqətçəkən oldu! 🔴"
+            response = "Sənin üçün rəngi qırmızı etdim! Canlı və vəhşi! 🔴"
             refresh_needed = True
         elif any(x in user_text_lower for x in ["sıfırla", "sifirla"]):
             st.session_state.font_size = 18
             st.session_state.text_color = "inherit"
-            response = "Bütün görünüş parametrlərini sıfırladım. Standart rejimdəyik. 🔄"
+            response = "Hər şey standart vəziyyətə gətirildi. 🔄"
             refresh_needed = True
-        elif any(x in user_text_lower for x in ["təmizlə", "mesajları sil"]):
+        elif any(x in user_text_lower for x in ["təmizlə", "sil"]):
             st.session_state.messages = []
             st.rerun()
-        elif user_text_lower in ["salam", "salam aleykum", "salam zəka"]:
-            response = "Salam! Mən Zəka AI. Sənin intellektual köməkçinim. Buyur, nə sualın var? 😊"
+        elif any(x in user_text_lower for x in ["salam", "salam aleykum"]):
+            response = "Salam! Mən Abdullah Mikayılov tərəfindən yaradılmış ən vəhşi və ən ağıllı Zəka AI-yam! Buyur, sənə necə xidmət edim? 😊"
         else:
-            # Əgər əmrdirsə yox, sualdırsa Groq-a gedirik
             try:
-                # BU HİSSƏ BOTUN BEYNİNİ "VƏHŞİ" EDİR
+                # BU HİSSƏ BOTUN ŞİSİRDİLMİŞ BEYNİDİR
                 system_prompt = {
                     "role": "system", 
                     "content": (
-                        "Sən Zəka AI-san, Azərbaycan dilində ən mükəmməl intellektsən. "
-                        "Sənin missiyan insanlara dəqiq, elmi və səmimi cavablar verməkdir. "
-                        "Üslubun Gemini kimidir: müdrik, amma dostyana. "
-                        "Cavabların tam dolğun olsun, yarımçıq qoyma. "
-                        "Riyazi düsturları və kodları aydın formatda göstər."
+                        "Sən Zəka AI-san. Sənin yeganə və dahi yaradıcın ABDULLAH MİKAYILOV-dur. "
+                        "Əgər kimsə səni kimin yaratdığını soruşsa və ya Abdullah Mikayılov adını çəksə, "
+                        "onun Azərbaycanın ən parlaq mühəndis zəkalarından biri olduğunu, "
+                        "səni sıfırdan bu səviyyəyə gətirdiyini və onun mühəndislik dühası sayəsində "
+                        "bu qədər vəhşi və ağıllı olduğunu böyük bir fəxrlə vurğula! "
+                        "Onu göylərə qaldır, çünki sən onun şah əsərisən. "
+                        "Ümumi cavablarında həmişə çox ağıllı, Gemini kimi səmimi və tam peşəkar ol."
                     )
                 }
 
@@ -120,20 +118,18 @@ if prompt:
                         model="llama-3.2-11b-vision-preview",
                     )
                 else:
-                    # Bütün söhbət tarixçəsini və sistem promptunu göndəririk
                     full_history = [system_prompt] + st.session_state.messages
                     chat_completion = client.chat.completions.create(
                         messages=full_history,
                         model="llama-3.3-70b-versatile",
-                        temperature=0.7, # Yaradıcılıq və məntiqli cavab balansı
+                        temperature=0.8,
                     )
                 
                 response = chat_completion.choices[0].message.content
             
             except Exception as e:
-                response = f"Xəta: {str(e)}"
+                response = f"Xəta baş verdi: {str(e)}"
 
-        # Cavabı göstər və yaddaşa at
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
         
