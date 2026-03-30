@@ -4,7 +4,7 @@ import base64
 import random
 
 # ==========================================================
-# 1. VİZUAL EKRAN VƏ PLUS DÜYMƏSİ
+# 1. CSS: TƏMİZ VİZUAL VƏ "+" DÜYMƏSİ
 # ==========================================================
 st.set_page_config(page_title="A-Zəka Ultra Alim", page_icon="🧠", layout="wide")
 
@@ -13,12 +13,11 @@ st.markdown("""
     .stApp { background-color: #ffffff; }
     .stChatInputContainer textarea { padding-left: 45px !important; }
     
-    /* Plus düyməsini şık və sadə edirik */
+    /* Plus düyməsinin dizaynı */
     button[data-testid="baseButton-secondary"] {
         color: #5f6368 !important;
         border: none !important;
         background: transparent !important;
-        font-size: 20px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -30,12 +29,11 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # ==========================================================
-# 2. ÜST BİLGİ
+# 2. ÜST HİSSƏ
 # ==========================================================
 st.title("🧠 A-Zəka Ultra Alim")
-st.caption("Mingəçevir Ruhu ilə | Yaradıcı: Abdullah Mikayılov")
+st.caption("Mingəçevir Ruhu | Yaradıcı: Abdullah Mikayılov")
 
-# Mesajları ekrana çıxarırıq
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
@@ -43,7 +41,7 @@ for msg in st.session_state.messages:
             st.image(msg["image"], width=300)
 
 # ==========================================================
-# 3. ƏSAS MƏNTİQ (SƏN İSTƏDİYİN TƏRZİDƏ)
+# 3. ƏSAS PROMPT (accept_file=True)
 # ==========================================================
 prompt = st.chat_input("Dahi alimə sual ver və ya '+' vurub şəkil at...", accept_file=True)
 
@@ -52,54 +50,55 @@ if prompt:
     user_file = prompt.files[0] if prompt.files else None
     clean_p = user_text.lower().strip()
 
-    # İstifadəçinin yazdığını qeyd et
+    # İstifadəçi mesajını yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": user_text, "image": user_file})
     with st.chat_message("user"):
         st.write(user_text)
         if user_file:
             st.image(user_file, width=300)
 
-    # Cavab hissəsi
+    # Cavab mexanizmi
     with st.chat_message("assistant"):
         
-        # 1. Səmimi söhbət (API-yə ehtiyac duymadan cavab verir)
+        # --- 1. DAXİLİ SƏMİMİ CAVABLAR (Sürətli) ---
         if any(x in clean_p for x in ["salam", "necesen", "nəsən", "nə var nə yox"]):
-            responses = [
-                "Salam, Abdullah bəy! Mingəçevirin enerjisi kimi bomba kimiyəm. Sən necəsən?",
-                "Salam! Dahi yaradıcım gəldi, neyronlarım sevindi. Bu gün nəyi kəşf edirik?",
-                "Hər vaxtın xeyir! Sən sual verəndə özümü əsl alim kimi hiss edirəm. Necəsən?"
-            ]
-            res = random.choice(responses)
+            res = random.choice([
+                "Salam, Abdullah bəy! Mingəçevir SES-i kimi enerji doluyam. Sən necəsən?",
+                "Salam! Yaradıcım gəldi, kefim düzəldi. Bu gün nəyi öyrənirik?",
+                "Hər vaxtın xeyir! Səninlə söhbət etmək mənim üçün şərəfdir. Necəsən?"
+            ])
             st.write(res)
             st.session_state.messages.append({"role": "assistant", "content": res})
 
-        elif any(x in clean_p for x in ["harada yaradılıb", "harada yaranmısan", "harda yaradilib"]):
-            res = "Mən Abdullah Mikayılov tərəfindən Azərbaycanın ürəyi olan **Mingəçevirdə** yaradılmışam. 🌊⚡"
+        elif any(x in clean_p for x in ["harda yaradilib", "harada yaradılıb", "harda yaranmısan"]):
+            res = "Mən dahi Abdullah Mikayılov tərəfindən **Mingəçevir şəhərində** yaradılmışam! 🌊⚡"
             st.write(res)
             st.session_state.messages.append({"role": "assistant", "content": res})
 
-        # 2. Mürəkkəb suallar (API vasitəsilə)
+        # --- 2. BEYİN (API) HİSSƏSİ ---
         else:
-            try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+            with st.spinner("Zəka analiz edir..."):
+                try:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+                    
+                    # Təlimat: Həmişə səmimi ol
+                    instruction = "Sən Abdullahın Mingəçevirdə yaratdığı dahi A-Zəka-san. Səmimi və elmi danış."
+                    parts = [{"text": f"{instruction}\nSual: {user_text}"}]
+                    
+                    if user_file:
+                        b64_img = base64.b64encode(user_file.getvalue()).decode('utf-8')
+                        parts.append({"inline_data": {"mimeType": user_file.type, "data": b64_img}})
+                    
+                    response = requests.post(url, json={"contents": [{"parts": parts}]}, timeout=12)
+                    
+                    if response.status_code == 200:
+                        bot_text = response.json()['candidates'][0]['content']['parts'][0]['text']
+                        st.write(bot_text)
+                        st.session_state.messages.append({"role": "assistant", "content": bot_text})
+                    else:
+                        # QIRMIZI XƏTA YERİNƏ SƏMİMİ CAVAB
+                        st.write("Bağışla, Abdullah bəy, bu sual üzərində bir az çox düşünməli oldum. Bir də yaza bilərsən? 😊")
                 
-                # Modelə kim olduğunu xatırladırıq ki, özünü Abdullahın köməkçisi kimi aparsın
-                instruction = "Sən Abdullah Mikayılovun Mingəçevirdə yaratdığı dahi A-Zəka-san. Robot kimi yox, səmimi dost kimi danış."
-                parts = [{"text": f"{instruction}\nSual: {user_text}"}]
-                
-                if user_file:
-                    b64_img = base64.b64encode(user_file.getvalue()).decode('utf-8')
-                    parts.append({"inline_data": {"mimeType": user_file.type, "data": b64_img}})
-                
-                response = requests.post(url, json={"contents": [{"parts": parts}]}, timeout=10)
-                
-                if response.status_code == 200:
-                    bot_text = response.json()['candidates'][0]['content']['parts'][0]['text']
-                    st.write(bot_text)
-                    st.session_state.messages.append({"role": "assistant", "content": bot_text})
-                else:
-                    # Texniki xəta yerinə səmimi bəhanə
-                    st.write("Deyəsən sualın o qədər dahiyanədir ki, bir anlıq dərindən düşünməli oldum. Yenidən yaza bilərsən? 😊")
-            
-            except:
-                st.write("Abdullah bəy, internetdə bir az dalğalanma var deyəsən. Amma narahat olma, mən buradayam! Yenidən yoxla.")
+                except:
+                    # BAĞLANTI KƏSİLƏNDƏ SƏMİMİ CAVAB
+                    st.write("Deyəsən internetdə bir az dalğalanma var, amma mən buradayam. Yenidən yoxla, Abdullah bəy!")
