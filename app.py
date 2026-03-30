@@ -79,31 +79,38 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# BALACA "+" DÜYMƏSİ
+# BALACA "+" DÜYMƏSİ (Köhnə yerində qalır)
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
     st.toast("Şəkil seçildi!")
 
 # ==========================================================
-# 4. SÖHBƏT VƏ ANALİZ (DUZELTILMIS HISSE)
+# 4. SÖHBƏT VƏ ANALİZ (SƏN İSTƏDİYİN DƏYİŞİKLİK)
 # ==========================================================
-if prompt := st.chat_input("Sualınızı bura yazın..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# Bura sənin istədiyin 'accept_file=True' əlavə edildi
+prompt = st.chat_input("Dahi alimə sual ver və ya '+' vurub şəkil at...", accept_file=True)
+
+if prompt:
+    user_text = prompt.text
+    # Həm fiteden (uploader), həm də chat_inputdan gələn faylı yoxlayırıq
+    active_file = uploaded_file if uploaded_file else (prompt.files[0] if prompt.files else None)
+    
+    st.session_state.messages.append({"role": "user", "content": user_text})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(user_text)
 
     with st.chat_message("assistant"):
         try:
-            if uploaded_file:
+            if active_file:
                 # EGER SEKIL VARSA - VISION MODELI ISLEYIR
-                base64_image = encode_image(uploaded_file)
+                base64_image = encode_image(active_file)
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {
                             "role": "user",
                             "content": [
-                                {"type": "text", "text": prompt},
+                                {"type": "text", "text": user_text},
                                 {
                                     "type": "image_url",
                                     "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
