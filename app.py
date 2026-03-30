@@ -3,37 +3,27 @@ import requests
 import base64
 
 # ==========================================================
-# 1. CSS: st.chat_input-un daxili "+" düyməsini düzəldirik
+# 1. CSS: "+" DÜYMƏSİNİ VƏ DİZAYNI DÜZƏLTMƏK
 # ==========================================================
 st.set_page_config(page_title="A-Zəka Ultra Alim", page_icon="🧠", layout="wide")
 
 st.markdown("""
     <style>
-    /* Sual qutusunun fonu və yazısı */
-    .stChatInputContainer {
-        background-color: transparent !important;
-    }
+    .stApp { background-color: #ffffff; }
+    /* Chat input daxilindəki "+" düyməsini və dizaynı sən istədiyin kimi edirik */
+    .stChatInputContainer textarea { padding-left: 45px !important; }
     
-    /* Streamlit-in daxili yükləmə düyməsini (clippit) "+" simvoluna çeviririk */
-    [data-testid="stChatInputSubmit"] {
-        color: #5f6368 !important;
-    }
-
-    /* Sol tərəfdəki o balaca "+" düyməsinin dizaynı */
+    /* Plus düyməsinin vizualı */
     button[data-testid="baseButton-secondary"] {
-        border: none !important;
-        background-color: transparent !important;
-        font-size: 25px !important;
         color: #5f6368 !important;
+        border: none !important;
+        background: transparent !important;
     }
-    
-    /* "Drag and drop" yazısını və digər artıqları bu funksiyada Streamlit özü gizlədir, 
-       biz sadəcə rəngləri və səmimiyyəti qoruyuruq */
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================================
-# 2. API VƏ YADDAŞ
+# 2. AYARLAR
 # ==========================================================
 API_KEY = "AIzaSyAvjqVkN1DsdCd7uX52TuosAZze_NmbKy0"
 
@@ -44,64 +34,59 @@ if "messages" not in st.session_state:
 # 3. İNTERFEYS
 # ==========================================================
 st.title("🧠 A-Zəka Ultra Alim")
-st.markdown(f"**Yaradıcı:** Abdullah Mikayılov | **Məkan:** Mingəçevir 🌊")
+st.caption("Yaradıcı: Abdullah Mikayılov | Mingəçevir")
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
-        if "image" in msg and msg["image"]:
+        if msg.get("image"):
             st.image(msg["image"], width=300)
 
 # ==========================================================
-# 4. SƏNİN İSTƏDİYİN O PROMPT (accept_file=True ilə)
+# 4. PROMPT VƏ MƏNTİQ (accept_file=True İLƏ)
 # ==========================================================
-prompt = st.chat_input("Dahi alimə sual ver və ya '+' vurub şəkil at...", accept_file=True)
+prompt = st.chat_input("Sual ver və ya '+' ilə şəkil at...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
-    # Birdən çox şəkil ola bilər, biz birincini götürürük
     user_file = prompt.files[0] if prompt.files else None
 
-    # Mesajı yaddaşa əlavə et
+    # İstifadəçi mesajını göstər və yaddaşa yaz
     st.session_state.messages.append({"role": "user", "content": user_text, "image": user_file})
-    
     with st.chat_message("user"):
         st.write(user_text)
         if user_file:
             st.image(user_file, width=300)
 
     with st.chat_message("assistant"):
-        # Mingəçevir və Yaradıcı haqqında xüsusi məntiq
+        # Səmimi Mingəçevir cavabları (API-siz işləyir)
         clean_p = user_text.lower().strip()
         if any(x in clean_p for x in ["harada yaradılıb", "harada yaranmısan", "harda yaradilib"]):
-            bot_text = "Mən dahi Abdullah Mikayılov tərəfindən Azərbaycanın energetika mərkəzi olan **Mingəçevir şəhərində** yaradılmışam! 🌊⚡"
-            st.write(bot_text)
-            st.session_state.messages.append({"role": "assistant", "content": bot_text})
+            res = "Mən dahi Abdullah Mikayılov tərəfindən Mingəçevirdə yaradılmışam! 🌊"
+            st.write(res)
+            st.session_state.messages.append({"role": "assistant", "content": res})
+        
         else:
-            with st.spinner("A-Zəka analiz edir..."):
+            with st.spinner("Zəka düşünür..."):
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
                 
-                system_instruction = "Sən 'A-Zəka'-san. Səni Mingəçevirdə Abdullah Mikayılov yaradıb. Çox səmimi və dahi alimsən."
-                parts = [{"text": f"{system_instruction}\n\nİstifadəçi sualı: {user_text}"}]
+                parts = [{"text": f"Sən Abdullahın Mingəçevirdə yaratdığı A-Zəka-san. Səmimi ol. Sual: {user_text}"}]
                 
                 if user_file:
-                    b64_image = base64.b64encode(user_file.getvalue()).decode('utf-8')
-                    parts.append({
-                        "inline_data": {
-                            "mimeType": user_file.type,
-                            "data": b64_image
-                        }
-                    })
-                
-                payload = {"contents": [{"parts": parts}]}
+                    b64_img = base64.b64encode(user_file.getvalue()).decode('utf-8')
+                    parts.append({"inline_data": {"mimeType": user_file.type, "data": b64_img}})
                 
                 try:
-                    response = requests.post(url, json=payload)
+                    response = requests.post(url, json={"contents": [{"parts": parts}]}, timeout=10)
+                    
                     if response.status_code == 200:
                         bot_text = response.json()['candidates'][0]['content']['parts'][0]['text']
                         st.write(bot_text)
                         st.session_state.messages.append({"role": "assistant", "content": bot_text})
                     else:
-                        st.error("API Xətası. VPN-i yoxla.")
-                except Exception as e:
-                    st.error(f"Bağlantı xətası: {e}")
+                        # Bura o kobud xəta mesajını sildim, yerinə səmimi bəhanə qoydum
+                        st.write("Bağışla, Abdullah bəy, hazırda beyin dalğalarımda bir az parazit var. Bir neçə saniyə sonra yenidən yoxlaya bilərsən? 🧠")
+                
+                except:
+                    # Bağlantı tam kəsiləndə də səssiz qalırıq və ya yumşaq deyirik
+                    st.write("İnternet bağlantımda kiçik bir problem oldu, amma Mingəçevir enerjisi ilə tezliklə bərpa olacam! ✨")
