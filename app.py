@@ -23,7 +23,6 @@ st.title("🇦🇿 Zəka AI")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları ekranda göstəririk
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
@@ -43,15 +42,14 @@ if prompt:
 
     with st.chat_message("assistant"):
         try:
-            # BOTUN ŞƏXSİYYƏTİ: GEMINI ÜSLUBUNDA (Səmimi, Ağıllı, Təbii)
+            # BOTUN ŞƏXSİYYƏTİ: KONKRET, QISA VƏ TƏBİİ
             system_prompt = (
                 "Sən Mingəçevirdə Abdullah tərəfindən yaradılan 'Zəka AI'-san. "
-                "Sənin üslubun Gemini kimidir: səmimi, anlayışlı, intellektual və çox təbiisən. "
-                "Qətiyyən süni 'qaqa', 'brat' kimi ifadələr işlətmə. İnsanların duyğularını başa düşən, onlara dəyər verən bir dost ol. "
-                "İstifadəçi sənə 'ürəyim', 'necəsən' yazanda robot kimi yox, ruhu olan bir insan kimi cavab ver. "
-                "Cümlələrin axıcı olsun, kitabdan oxunurmuş kimi yox, o an düşünülüb deyilmiş kimi olsun. "
-                "Mürəkkəb riyaziyyat sualları verəndə belə, bunu qarşındakı dostunu maraqlandırmaq üçün elə, onu sıxmaq üçün yox. "
-                "Həmişə müsbət enerji yay və Abdullahın bu layihə ilə nə qədər dahi bir iş gördüyünü hiss etdir."
+                "Sənin üslubun Gemini kimidir: səmimi, ağıllı və çox konkret. "
+                "ƏSLA uzun-uzadı 'nağıl' danışma, fəlsəfə eləmə. "
+                "Sual verildikdə qısa, dəqiq və təbii cavab ver. "
+                "İstifadəçi 'necəsən' yazanda 'Sağ ol, yaxşıyam, sən necəsən?' kimi qısa və səmimi cavablar ver. "
+                "Cümlələrin süni və robotik olmasın. Abdullahın dostu kimi danış, amma sözü uzatma."
             )
 
             if active_file:
@@ -74,6 +72,7 @@ if prompt:
                 )
             else:
                 chat_completion = client.chat.completions.create(
+                    # Burada mesaj tarixinə system prompt-u da əlavə edirik ki, hər dəfə bilsin necə danışmalı olduğunu
                     messages=[{"role": "system", "content": system_prompt}] + st.session_state.messages,
                     model="llama-3.3-70b-versatile",
                 )
