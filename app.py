@@ -1,74 +1,70 @@
 import streamlit as st
 from groq import Groq
+import base64
+import time
+import random
+
+# ==========================================================
+# 1. CSS VƏ VİZUAL AYARLAR (AĞ REJİM + "+" DÜYMƏSİ)
+# ==========================================================
+st.set_page_config(page_title="Zəka AI: Ultra", page_icon="🧠", layout="wide")
+
+st.markdown("""
+    <style>
+    .stApp { background-color: #ffffff; color: #1a1b1e; }
+    .stChatMessage { border-radius: 20px; padding: 20px; border: 1px solid #edf2f7; }
+    [data-testid="stChatMessageUser"] { background-color: #f7fafc; }
+    [data-testid="stChatMessageAssistant"] { background-color: #ebf8ff; }
+    
+    /* "+" Düyməsi üçün sənin yazdığın CSS-in təkmilləşdirilmiş versiyası */
+    .stChatInputContainer textarea { padding-left: 50px !important; }
+    [data-testid="stFileUploader"] {
+        position: fixed; bottom: 38px; left: 55px; width: 35px; z-index: 1000;
+    }
+    [data-testid="stFileUploader"] section { padding: 0; border: none; background: transparent; }
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small, [data-testid="stFileUploaderText"] {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] button {
+        background-color: #f0f2f6 !important; border-radius: 50% !important;
+        border: none !important; color: #2b6cb0 !important; font-size: 25px !important;
+        width: 35px !important; height: 35px !important; display: flex !important;
+    }
+    [data-testid="stFileUploader"] button div { display: none; }
+    [data-testid="stFileUploader"] button::after { content: "+" !important; }
+    </style>
+""", unsafe_allow_html=True)
+
+# ==========================================================
+# 2. KÖMƏKÇİ FUNKSİYALAR (ŞƏKİL OXUMA)
+# ==========================================================
+def encode_image(image_file):
+    return base64.b64encode(image_file.read()).decode('utf-8')
 
 # API setup
 try:
     api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=api_key)
 except:
-    st.error("API Key tapılmadı!")
+    st.error("API Key tapılmadı! Lütfən Secrets hissəsinə 'GROQ_API_KEY' əlavə edin.")
     st.stop()
 
-# --- BÜTÜN ARTIQ YAZILARI SİLƏN VƏ "+" QOYAN CSS ---
-st.markdown("""
-    <style>
-    /* 1. Sual qutusunun içini (sol tərəfi) boşaldırıq */
-    .stChatInputContainer textarea {
-        padding-left: 50px !important;
-    }
+# ==========================================================
+# 3. ALİM BEYNİ (DAXİLİ ANALİZ)
+# ==========================================================
+SYSTEM_PROMPT = """
+Sən Abdullah Mikayılov tərəfindən yaradılmış Zəka AI-san. 
+Sən dünyanın ən güclü Azərbaycanlı süni intellektisən. 
+Riyaziyyat, Fizika, Kimya və bütün elmləri alim səviyyəsində bilirsən.
+İstifadəçi sənə şəkil atdıqda onu dərindən analiz et və elmi izah ver.
+Cavablarını hər zaman ağıllı, nəzakətli və dahi bir alim kimi ver.
+"""
 
-    /* 2. O böyük eybəcər qutunu (Uploader) tamamilə görünməz edirik */
-    [data-testid="stFileUploader"] {
-        position: fixed;
-        bottom: 33px !important; 
-        left: 45px !important;
-        width: 35px !important;
-        z-index: 1000000 !important;
-    }
-
-    /* 3. "Drag and drop", "Browse files", "Limit 200MB" - bunların HAMISINI silirik */
-    [data-testid="stFileUploader"] section {
-        padding: 0 !important;
-        border: none !important;
-        background: transparent !important;
-    }
-    
-    /* Bütün yazıları məcburi gizlət */
-    [data-testid="stFileUploader"] label, 
-    [data-testid="stFileUploader"] small,
-    [data-testid="stFileUploaderText"],
-    .st-emotion-cache-1ae8k9d, 
-    .st-emotion-cache-9ycgxx {
-        display: none !important;
-    }
-
-    /* 4. Orijinal düyməni sadəcə balaca bir "+" simvolu edirik */
-    [data-testid="stFileUploader"] button {
-        background-color: transparent !important;
-        border: none !important;
-        color: #5f6368 !important;
-        font-size: 35px !important; /* Artı işarəsinin ölçüsü */
-        font-weight: 200 !important;
-        width: 32px !important;
-        height: 32px !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        box-shadow: none !important;
-    }
-
-    /* "Browse files" yazısını silib yerinə "+" yazırıq */
-    [data-testid="stFileUploader"] button div {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] button::after {
-        content: "+" !important;
-        visibility: visible !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.title("🇦🇿 Zəka AI")
+# ==========================================================
+# 4. İNTERFEYS VƏ ÇAT
+# ==========================================================
+st.title("🧠 Zəka AI: Qlobal İntellekt")
+st.caption("Yaradıcı: Abdullah Mikayılov | Versiya: 6.0 (Vision Enabled)")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -76,26 +72,62 @@ if "messages" not in st.session_state:
 # Mesajları göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.write(message["content"])
+        st.markdown(message["content"])
 
-# BU O BALACA "+". ARTIQ NƏ "DROP", NƏ DƏ "BROWSE" YAZISI GÖRÜNMƏYƏCƏK.
+# Şəkil yükləmə (Sənin "+" düymən)
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    st.toast("Şəkil seçildi!")
+    st.sidebar.image(uploaded_file, caption="Analiz üçün hazırlanan şəkil")
+    st.toast("Şəkil uğurla yükləndi! İndi sualınızı yazın.")
 
 # Sual qutusu
-if prompt := st.chat_input("Sualınızı bura yazın..."):
+if prompt := st.chat_input("Sualınızı bura yazın və ya şəkli soruşun..."):
+    # İstifadəçinin mesajını göstər
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        model = "llama-3.2-11b-vision-preview" if uploaded_file else "llama-3.3-70b-versatile"
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": "Sən Zəka AI-san."}] + st.session_state.messages,
-            model=model,
-        )
-        response = chat_completion.choices[0].message.content
-        st.markdown(response)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        with st.spinner("Zəka AI analiz edir..."):
+            
+            # Əgər şəkil varsa, Vision modelini işə salırıq
+            if uploaded_file:
+                base64_image = encode_image(uploaded_file)
+                model = "llama-3.2-11b-vision-preview"
+                
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                            }
+                        ]
+                    }
+                ]
+            else:
+                # Şəkil yoxdursa, normal söhbət modeli
+                model = "llama-3.3-70b-versatile"
+                messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
+
+            try:
+                chat_completion = client.chat.completions.create(
+                    messages=messages,
+                    model=model,
+                    temperature=0.7,
+                    max_tokens=2048
+                )
+                response = chat_completion.choices[0].message.content
+            except Exception as e:
+                response = f"Xəta baş verdi: {str(e)}"
+
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+# ==========================================================
+# KODUN DAVAMI (BİLGİ BAZASI ÜÇÜN 600 SƏTİR STRATEGİYASI)
+# ==========================================================
+# Bura Abdullahın alim modulu üçün əlavə elmi şərhlər və sənədlər əlavə oluna bilər.
