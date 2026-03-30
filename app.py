@@ -29,15 +29,12 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # ==========================================================
-# 3. SÖHBƏT VƏ ŞƏKİL ANALİZİ (TƏMİZLƏNMİŞ)
+# 3. SÖHBƏT VƏ ŞƏKİL ANALİZİ
 # ==========================================================
-# 'accept_file=True' çat qutusunun özündə şəkil düyməsi yaradır. 
-# Artıq küncdəki o pis görünən '+' və 'browse' yazılarına ehtiyac yoxdur.
 prompt = st.chat_input("Dahi alimə sual ver və ya şəkil at...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
-    # Çat qutusunun daxilindən gələn faylı götürürük
     active_file = prompt.files[0] if prompt.files else None
     
     st.session_state.messages.append({"role": "user", "content": user_text})
@@ -46,11 +43,19 @@ if prompt:
 
     with st.chat_message("assistant"):
         try:
+            # BOTUN ŞƏXSİYYƏTİ BURADA TƏYİN OLUNUR
+            system_prompt = (
+                "Sən Mingəçevirdə Abdullah tərəfindən yaradılan Zəka AI-san. "
+                "Sənin xarakterin səmimi, ağıllı və bir az zarafatcıldır. "
+                "İstifadəçi sənə 'ureyim', 'canım' və ya dostca müraciət edəndə, sən də eyni səmimiyyətlə cavab ver. "
+                "Robot kimi rəsmi danışma, dost kimi danış. Abdullahın dostu olduğunu hiss etdir."
+            )
+
             if active_file:
-                # EGER ŞƏKİL VARSA
                 base64_image = encode_image(active_file)
                 chat_completion = client.chat.completions.create(
                     messages=[
+                        {"role": "system", "content": system_prompt},
                         {
                             "role": "user",
                             "content": [
@@ -65,9 +70,9 @@ if prompt:
                     model="llama-3.2-11b-vision-preview",
                 )
             else:
-                # EGER ANCAQ MƏTN VARSA
+                # Bura sistem təlimatını və keçmiş mesajları əlavə edirik
                 chat_completion = client.chat.completions.create(
-                    messages=[{"role": "system", "content": "Sən Mingəçevirdə Abdullah tərəfindən yaradılan Zəka AI-san."}] + st.session_state.messages,
+                    messages=[{"role": "system", "content": system_prompt}] + st.session_state.messages,
                     model="llama-3.3-70b-versatile",
                 )
             
