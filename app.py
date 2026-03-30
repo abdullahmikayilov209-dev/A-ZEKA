@@ -2,7 +2,6 @@ import streamlit as st
 from groq import Groq
 import base64
 import time
-import random
 
 # ==========================================================
 # 1. CSS VƏ VİZUAL AYARLAR (AĞ REJİM + "+" DÜYMƏSİ)
@@ -16,29 +15,43 @@ st.markdown("""
     [data-testid="stChatMessageUser"] { background-color: #f7fafc; }
     [data-testid="stChatMessageAssistant"] { background-color: #ebf8ff; }
     
-    /* "+" Düyməsi üçün sənin yazdığın CSS-in təkmilləşdirilmiş versiyası */
-    .stChatInputContainer textarea { padding-left: 50px !important; }
+    /* Sual qutusunun daxili boşluğu */
+    .stChatInputContainer textarea { padding-left: 55px !important; }
+
+    /* "+" Düyməsinin dəqiq yerləşdirilməsi (Sənin istədiyin kimi) */
     [data-testid="stFileUploader"] {
-        position: fixed; bottom: 38px; left: 55px; width: 35px; z-index: 1000;
+        position: fixed;
+        bottom: 34px; /* Sual qutusunun tam sol küncü */
+        left: 48px;
+        width: 40px !important;
+        z-index: 1000;
     }
     [data-testid="stFileUploader"] section { padding: 0; border: none; background: transparent; }
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small, [data-testid="stFileUploaderText"] {
         display: none !important;
     }
     [data-testid="stFileUploader"] button {
-        background-color: #f0f2f6 !important; border-radius: 50% !important;
-        border: none !important; color: #2b6cb0 !important; font-size: 25px !important;
-        width: 35px !important; height: 35px !important; display: flex !important;
+        background-color: transparent !important;
+        border: none !important;
+        color: #5f6368 !important;
+        font-size: 30px !important;
+        font-weight: 200 !important;
+        width: 35px !important;
+        height: 35px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
     [data-testid="stFileUploader"] button div { display: none; }
-    [data-testid="stFileUploader"] button::after { content: "+" !important; }
+    [data-testid="stFileUploader"] button::after { content: "+" !important; visibility: visible !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================================
-# 2. KÖMƏKÇİ FUNKSİYALAR (ŞƏKİL OXUMA)
+# 2. KÖMƏKÇİ FUNKSİYALAR (ŞƏKİL ANALİZİ ÜÇÜN)
 # ==========================================================
 def encode_image(image_file):
+    """Şəkli modelin başa düşəcəyi koda çevirir"""
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # API setup
@@ -46,88 +59,73 @@ try:
     api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=api_key)
 except:
-    st.error("API Key tapılmadı! Lütfən Secrets hissəsinə 'GROQ_API_KEY' əlavə edin.")
+    st.error("API Key tapılmadı! Secrets hissəsinə 'GROQ_API_KEY' əlavə edin.")
     st.stop()
 
 # ==========================================================
-# 3. ALİM BEYNİ (DAXİLİ ANALİZ)
+# 3. İNTERFEYS
 # ==========================================================
-SYSTEM_PROMPT = """
-Sən Abdullah Mikayılov tərəfindən yaradılmış Zəka AI-san. 
-Sən dünyanın ən güclü Azərbaycanlı süni intellektisən. 
-Riyaziyyat, Fizika, Kimya və bütün elmləri alim səviyyəsində bilirsən.
-İstifadəçi sənə şəkil atdıqda onu dərindən analiz et və elmi izah ver.
-Cavablarını hər zaman ağıllı, nəzakətli və dahi bir alim kimi ver.
-"""
-
-# ==========================================================
-# 4. İNTERFEYS VƏ ÇAT
-# ==========================================================
-st.title("🧠 Zəka AI: Qlobal İntellekt")
-st.caption("Yaradıcı: Abdullah Mikayılov | Versiya: 6.0 (Vision Enabled)")
+st.title("🇦🇿 Zəka AI")
+st.caption("Müəllif: Abdullah Mikayılov | Vision Modulu Aktivdir")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları göstər
+# Söhbət tarixçəsini göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Şəkil yükləmə (Sənin "+" düymən)
+# Sənin istədiyin "+" düyməsi (Şəkil seçmək üçün)
 uploaded_file = st.file_uploader("", type=['png', 'jpg', 'jpeg'])
 
 if uploaded_file:
-    st.sidebar.image(uploaded_file, caption="Analiz üçün hazırlanan şəkil")
-    st.toast("Şəkil uğurla yükləndi! İndi sualınızı yazın.")
+    # Şəkli ekranda balaca göstərək ki, istifadəçi nə yüklədiyini bilsin
+    st.sidebar.image(uploaded_file, caption="Analiz ediləcək şəkil", use_container_width=True)
+    st.toast("Şəkil analiz üçün hazırdır!")
 
-# Sual qutusu
-if prompt := st.chat_input("Sualınızı bura yazın və ya şəkli soruşun..."):
-    # İstifadəçinin mesajını göstər
+# ==========================================================
+# 4. ANALİZ VƏ CAVAB MƏNTİQİ
+# ==========================================================
+if prompt := st.chat_input("Sualınızı yazın və ya şəkli analiz etdirin..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Zəka AI analiz edir..."):
-            
-            # Əgər şəkil varsa, Vision modelini işə salırıq
-            if uploaded_file:
-                base64_image = encode_image(uploaded_file)
-                model = "llama-3.2-11b-vision-preview"
-                
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
-                            }
-                        ]
-                    }
-                ]
-            else:
-                # Şəkil yoxdursa, normal söhbət modeli
-                model = "llama-3.3-70b-versatile"
-                messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
-
+        with st.spinner("Zəka AI düşünür və analiz edir..."):
             try:
-                chat_completion = client.chat.completions.create(
-                    messages=messages,
-                    model=model,
-                    temperature=0.7,
-                    max_tokens=2048
-                )
+                # Ssenari A: İstifadəçi şəkil yükləyib
+                if uploaded_file:
+                    base64_image = encode_image(uploaded_file)
+                    # Vision üçün Llama 3.2 istifadə edirik
+                    chat_completion = client.chat.completions.create(
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": f"Sən Abdullah Mikayılovun yaratdığı dahi Zəka AI-san. Bu şəkli alim kimi analiz et: {prompt}"},
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                                    }
+                                ]
+                            }
+                        ],
+                        model="llama-3.2-11b-vision-preview",
+                    )
+                # Ssenari B: Sadəcə mətnlə sual soruşur
+                else:
+                    chat_completion = client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": "Sən Abdullah Mikayılovun yaratdığı dahi Zəka AI-san."}
+                        ] + st.session_state.messages,
+                        model="llama-3.3-70b-versatile",
+                    )
+                
                 response = chat_completion.choices[0].message.content
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                
             except Exception as e:
-                response = f"Xəta baş verdi: {str(e)}"
-
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-
-# ==========================================================
-# KODUN DAVAMI (BİLGİ BAZASI ÜÇÜN 600 SƏTİR STRATEGİYASI)
-# ==========================================================
-# Bura Abdullahın alim modulu üçün əlavə elmi şərhlər və sənədlər əlavə oluna bilər.
+                st.error(f"Sistemdə xəta: {str(e)}")
