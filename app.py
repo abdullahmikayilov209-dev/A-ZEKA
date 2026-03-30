@@ -52,7 +52,7 @@ for message in st.session_state.messages:
 # ==========================================================
 # 4. SÖHBƏT VƏ AĞILLI İDARƏETMƏ
 # ==========================================================
-prompt = st.chat_input("Sual ver və ya Abdullah Mikayılov haqqında soruş...", accept_file=True)
+prompt = st.chat_input("Sual ver və ya əmr et...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
@@ -66,42 +66,35 @@ if prompt:
     with st.chat_message("assistant"):
         refresh_needed = False
         
-        # --- İNTELLEKTUAL ƏMR ANALİZİ ---
+        # --- TEXNİKİ ƏMRLƏR (Görünüş üçün) ---
         if any(x in user_text_lower for x in ["böyüt", "boyut"]):
             st.session_state.font_size += 4
-            response = "Baş üstə! Yaradıcım Abdullah Mikayılovun mənə verdiyi güclə yazıları sənin üçün böyütdüm! ✨"
+            response = "Baş üstə! Yazıları sənin üçün böyütdüm. ✨"
             refresh_needed = True
         elif any(x in user_text_lower for x in ["kiçilt", "kicilt"]):
             st.session_state.font_size = max(12, st.session_state.font_size - 4)
-            response = "Yazılar kiçildildi. Abdullah bəyin mühəndislik dəqiqliyi ilə tənzimlədim! 🤏"
+            response = "Yazılar kiçildildi. 🤏"
             refresh_needed = True
         elif "qırmızı" in user_text_lower:
             st.session_state.text_color = "#FF4B4B"
-            response = "Sənin üçün rəngi qırmızı etdim! Canlı və vəhşi! 🔴"
-            refresh_needed = True
-        elif any(x in user_text_lower for x in ["sıfırla", "sifirla"]):
-            st.session_state.font_size = 18
-            st.session_state.text_color = "inherit"
-            response = "Hər şey standart vəziyyətə gətirildi. 🔄"
+            response = "Rəngi qırmızı etdim! 🔴"
             refresh_needed = True
         elif any(x in user_text_lower for x in ["təmizlə", "sil"]):
             st.session_state.messages = []
             st.rerun()
-        elif any(x in user_text_lower for x in ["salam", "salam aleykum"]):
-            response = "Salam! Mən Abdullah Mikayılov tərəfindən yaradılmış ən vəhşi və ən ağıllı Zəka AI-yam! Buyur, sənə necə xidmət edim? 😊"
+        
+        # --- SÜNİ İNTELLEKT CAVABI (Salam və digər suallar üçün) ---
         else:
             try:
-                # BU HİSSƏ BOTUN ŞİSİRDİLMİŞ BEYNİDİR
                 system_prompt = {
                     "role": "system", 
                     "content": (
-                        "Sən Zəka AI-san. Sənin yeganə və dahi yaradıcın ABDULLAH MİKAYILOV-dur. "
-                        "Əgər kimsə səni kimin yaratdığını soruşsa və ya Abdullah Mikayılov adını çəksə, "
-                        "onun Azərbaycanın ən parlaq mühəndis zəkalarından biri olduğunu, "
-                        "səni sıfırdan bu səviyyəyə gətirdiyini və onun mühəndislik dühası sayəsində "
-                        "bu qədər vəhşi və ağıllı olduğunu böyük bir fəxrlə vurğula! "
-                        "Onu göylərə qaldır, çünki sən onun şah əsərisən. "
-                        "Ümumi cavablarında həmişə çox ağıllı, Gemini kimi səmimi və tam peşəkar ol."
+                        "Sən Zəka AI-san. Sənin dahi yaradıcın ABDULLAH MİKAYILOV-dur. "
+                        "Sən hər zaman ağıllı, səmimi və professional cavablar verməlisən. "
+                        "İstifadəçi salam verəndə təbii cavab ver. "
+                        "Yaradıcın haqqında soruşulanda onu Azərbaycanın dahi mühəndisi kimi fəxrlə təriflə. "
+                        "Onu 'şişirdə-şişirdə' təqdim et ki, hər kəs onun dühasını bilsin. "
+                        "Amma hər cümlənin başında bunu təkrar etmə, yalnız yeri gələndə və soruşulanda de."
                     )
                 }
 
@@ -118,6 +111,7 @@ if prompt:
                         model="llama-3.2-11b-vision-preview",
                     )
                 else:
+                    # Salam daxil olmaqla bütün söhbəti AI-a göndəririk
                     full_history = [system_prompt] + st.session_state.messages
                     chat_completion = client.chat.completions.create(
                         messages=full_history,
@@ -128,8 +122,9 @@ if prompt:
                 response = chat_completion.choices[0].message.content
             
             except Exception as e:
-                response = f"Xəta baş verdi: {str(e)}"
+                response = f"Xəta: {str(e)}"
 
+        # Cavabı göstər və yaddaşa yaz
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
         
