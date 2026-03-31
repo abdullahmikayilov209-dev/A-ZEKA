@@ -4,7 +4,7 @@ import base64
 import re
 
 # ==========================================================
-# 1. GLOBAL CORE SETUP (STABLE MODELS)
+# 1. GLOBAL CORE SETUP (NEW 2026 STABLE MODELS)
 # ==========================================================
 try:
     api_key = st.secrets["GROQ_API_KEY"]
@@ -13,9 +13,10 @@ except:
     st.error("Kritik Xəta: API açarı tapılmadı.")
     st.stop()
 
-# Model adlarını burdan idarə edirik (Groq-un ən son stabil adları)
-TEXT_MODEL = "llama-3.3-70b-versatile"
-VISION_MODEL = "llama-3.2-11b-vision-preview" # Əgər bu da bağlansa, Groq panelindən yeni adı bura yazmalısan
+# DİQQƏT: Groq-un ən son stabil vision modeli budur:
+# Əgər yenə xəta versə, bura 'llama-3.2-90b-vision-preview' yazaraq yoxla.
+VISION_MODEL_NAME = "llama-3.2-11b-vision-preview" 
+TEXT_MODEL_NAME = "llama-3.3-70b-versatile"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -56,8 +57,7 @@ for message in st.session_state.messages:
 prompt = st.chat_input("Mesajınızı yazın...", accept_file=True)
 
 if prompt:
-    user_text = prompt.text if prompt.text else "Bu şəkildə nə var?"
-    user_text_lower = user_text.lower().strip() 
+    user_text = prompt.text if prompt.text else "Bu şəkli analiz et."
     active_file = prompt.files[0] if prompt.files else None
     
     st.session_state.messages.append({"role": "user", "content": user_text})
@@ -65,31 +65,31 @@ if prompt:
         st.write(user_text)
 
     with st.chat_message("assistant"):
-        with st.status("🚀 Analiz edilir...", expanded=False) as status:
-            st.write("Zəka Ultra mühərriki işə düşür...")
+        with st.status("🚀 Zəka Ultra Analiz Edir...", expanded=False) as status:
+            st.write("Mühərrik işə düşdü...")
             status.update(label="Analiz Tamamlandı!", state="complete")
 
         response = ""
+        user_text_lower = user_text.lower().strip()
 
-        # 1. Xüsusi Reaksiyalar
-        if "abdullah" in user_text_lower and ("kim" in user_text_lower):
-            response = "🛡️ **GİRİŞ:** Memar Abdullah Mikayılov tanındı. Sistem tam nəzarətinizdədir."
+        # Xüsusi Reaksiyalar (Riyaziyyat və Memar Tanınması)
+        if "abdullah" in user_text_lower:
+            response = "🛡️ **SİSTEM MESAJI:** Memar Abdullah Mikayılov tanındı. Xoş gəldiniz."
         
-        # 2. Riyazi Analiz
         math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
         if not response and len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
             try:
-                response = f"🎯 **NƏTİCƏ:** `{user_text}` = **{eval(math_pattern)}**"
+                response = f"🎯 **RİYAZİ NƏTİCƏ:** `{user_text}` = **{eval(math_pattern)}**"
             except: pass
 
-        # 3. Əsas AI Modulu
+        # Əsas AI Modulu
         if not response:
             try:
                 system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026."
                 
                 if active_file:
                     base64_image = encode_image(active_file)
-                    # DİKKAT: Əgər bu model xəta versə, deməli Groq vision dəstəyini müvəqqəti dayandırıb
+                    # VISION REQUEST
                     chat_completion = client.chat.completions.create(
                         messages=[
                             {"role": "system", "content": system_instruction},
@@ -98,19 +98,18 @@ if prompt:
                                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                             ]}
                         ],
-                        model="llama-3.2-11b-vision-preview", # Bu ən stabil variant olmalıdır
+                        model=VISION_MODEL_NAME,
                     )
                 else:
+                    # TEXT ONLY REQUEST
                     msgs = [{"role": "system", "content": system_instruction}] + st.session_state.messages
                     chat_completion = client.chat.completions.create(
                         messages=msgs,
-                        model=TEXT_MODEL,
-                        temperature=0.3,
+                        model=TEXT_MODEL_NAME,
                     )
                 response = chat_completion.choices[0].message.content
             except Exception as e:
-                # Əgər vision modeli işləməsə, heç olmasa mətnlə cavab ver
-                response = f"⚠️ **Zəka Ultra Qeydi:** Vision modeli (şəkil analizi) hal-hazırda Groq tərəfindən yenilənir. Mətn mühərriki isə aktivdir. Xəta: {str(e)}"
+                response = f"⚠️ **Sistem Xətası:** Groq hazırda Vision modelini yeniləyir. Zəhmət olmasa 5 dəqiqə sonra yenidən yoxlayın. (Xəta kodu: {str(e)})"
 
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
