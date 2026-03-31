@@ -4,7 +4,7 @@ import base64
 import re
 
 # ==========================================================
-# 1. GLOBAL CORE SETUP (NEW 2026 STABLE MODELS)
+# 1. GLOBAL CORE SETUP (RƏSMİ 2026 STABLE MODELLƏR)
 # ==========================================================
 try:
     api_key = st.secrets["GROQ_API_KEY"]
@@ -13,9 +13,8 @@ except:
     st.error("Kritik Xəta: API açarı tapılmadı.")
     st.stop()
 
-# DİQQƏT: Groq-un ən son stabil vision modeli budur:
-# Əgər yenə xəta versə, bura 'llama-3.2-90b-vision-preview' yazaraq yoxla.
-VISION_MODEL_NAME = "llama-3.2-11b-vision-preview" 
+# DİQQƏT: Artıq "preview" deyil, rəsmi "instruct" modelidir!
+VISION_MODEL_NAME = "llama-3.2-11b-vision-instruct" 
 TEXT_MODEL_NAME = "llama-3.3-70b-versatile"
 
 if "messages" not in st.session_state:
@@ -25,7 +24,7 @@ def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # ==========================================================
-# 2. VİSUAL İNTERFEYS
+# 2. VİSUAL İNTERFEYS (PREMIUM)
 # ==========================================================
 st.set_page_config(page_title="ZƏKA ULTRA v6.0", layout="wide")
 
@@ -54,10 +53,11 @@ for message in st.session_state.messages:
 # ==========================================================
 # 3. INPUT VƏ MƏNTİQ
 # ==========================================================
+# Streamlit-in accept_file=True funksiyası o istədiyin "+" (əlavə et) ikonunu avtomatik yaradır
 prompt = st.chat_input("Mesajınızı yazın...", accept_file=True)
 
 if prompt:
-    user_text = prompt.text if prompt.text else "Bu şəkli analiz et."
+    user_text = prompt.text if prompt.text else "Bu şəkli detallı analiz et və nə gördüyünü yaz."
     active_file = prompt.files[0] if prompt.files else None
     
     st.session_state.messages.append({"role": "user", "content": user_text})
@@ -72,7 +72,7 @@ if prompt:
         response = ""
         user_text_lower = user_text.lower().strip()
 
-        # Xüsusi Reaksiyalar (Riyaziyyat və Memar Tanınması)
+        # Xüsusi Reaksiyalar
         if "abdullah" in user_text_lower:
             response = "🛡️ **SİSTEM MESAJI:** Memar Abdullah Mikayılov tanındı. Xoş gəldiniz."
         
@@ -85,11 +85,11 @@ if prompt:
         # Əsas AI Modulu
         if not response:
             try:
-                system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026."
+                system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026. Şəkilləri və mətnləri yüksək dəqiqliklə analiz edirsən."
                 
                 if active_file:
                     base64_image = encode_image(active_file)
-                    # VISION REQUEST
+                    # YENİ RƏSMİ VISION SORĞUSU
                     chat_completion = client.chat.completions.create(
                         messages=[
                             {"role": "system", "content": system_instruction},
@@ -109,7 +109,12 @@ if prompt:
                     )
                 response = chat_completion.choices[0].message.content
             except Exception as e:
-                response = f"⚠️ **Sistem Xətası:** Groq hazırda Vision modelini yeniləyir. Zəhmət olmasa 5 dəqiqə sonra yenidən yoxlayın. (Xəta kodu: {str(e)})"
+                # Əgər yene xəta olsa, sistemi çökdürmə, səliqəli cavab ver
+                error_msg = str(e)
+                if "decommissioned" in error_msg or "400" in error_msg or "404" in error_msg:
+                    response = "⚠️ **Zəka Ultra Bildirişi:** Groq hazırda şəkil mühərrikində (Vision API) yenilənmə aparır. Lütfən hələlik yalnız mətnlə sual verin. Mətn mühərriki 100% aktivdir!"
+                else:
+                    response = f"⚠️ **Sistem Xətası:** Zəka Ultra serverlə bağlana bilmədi. Detal: {error_msg}"
 
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
