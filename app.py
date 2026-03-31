@@ -3,6 +3,7 @@ from groq import Groq
 import base64
 from datetime import datetime
 import re
+import random
 
 # ==========================================================
 # 1. NÜVƏ QURĞUSU (API SETUP)
@@ -27,60 +28,24 @@ st.set_page_config(page_title="ZƏKA AI | ABDULLAH MİKAYILOV", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp {
-        background: #ffffff;
-        color: #1e293b;
-    }
+    .stApp { background: #ffffff; color: #1e293b; }
     .stChatMessage {
         background-color: #f8fafc !important;
         border-radius: 15px !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
         padding: 15px !important;
         margin-bottom: 12px;
     }
-    .stChatMessage p {
-        font-family: 'Inter', -apple-system, sans-serif;
-        font-size: 17px !important;
-        color: #0f172a !important;
-        line-height: 1.6;
-    }
-    [data-testid="stChatInput"] {
-        border: 1px solid #cbd5e1 !important;
-        background-color: #ffffff !important;
-        border-radius: 12px !important;
-    }
-    h1 {
-        font-family: 'Inter', sans-serif;
-        color: #0f172a !important;
-        text-align: center;
-        font-size: 2.5rem !important;
-        font-weight: 800;
-        letter-spacing: -1px;
-        margin-bottom: 5px;
-    }
-    .stCaption {
-        text-align: center;
-        color: #64748b !important;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 600;
-    }
-    hr {
-        margin: 2em 0;
-        border: 0;
-        border-top: 1px solid #f1f5f9;
-    }
+    h1 { text-align: center; font-family: 'Inter', sans-serif; font-weight: 800; color: #0f172a; }
+    .stCaption { text-align: center; color: #64748b; letter-spacing: 2px; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
 # ==========================================================
 # 3. İNTERFEYSİN QURULMASI
 # ==========================================================
 st.markdown("<h1>ZƏKA AI</h1>", unsafe_allow_html=True)
-st.markdown(f"<p class='stCaption'>MEMAR: ABDULLAH MİKAYILOV | STATUS: ONLAYN {datetime.now().year}</p>", unsafe_allow_html=True)
+st.markdown(f"<p class='stCaption'>MEMAR: ABDULLAH MİKAYILOV | STATUS: AKTİV {datetime.now().year}</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 for message in st.session_state.messages:
@@ -88,9 +53,9 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # ==========================================================
-# 4. "ZƏKA" MƏNTİQİ VƏ ANALİZ
+# 4. "ZƏKA" UNİKAL MƏNTİQİ
 # ==========================================================
-prompt = st.chat_input("Sualınızı bura daxil edin...", accept_file=True)
+prompt = st.chat_input("Zəka ilə ünsiyyət qur...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
@@ -102,38 +67,38 @@ if prompt:
         st.write(user_text)
 
     with st.chat_message("assistant"):
-        with st.spinner("Analiz edilir..."):
+        with st.spinner("Zəka düşünür..."):
             response = ""
-            
-            # --- ÖZƏL REAKSİYALAR (Sürətli və Konkret) ---
-            greetings = ["salam", "salam aleykum", "sağ ol", "necesen", "nə var nə yox", "merhaba"]
-            
-            # Əgər istifadəçi sadəcə salam verirsə, API-ni yormadan birbaşa cavab veririk:
-            if user_text_lower in greetings:
-                response = "Salam! Sizə hansı mövzuda kömək edə bilərəm? Buyurun, sualınızı verin."
-            
-            elif "halaldi sene" in user_text_lower:
-                response = "Təşəkkür edirəm. Lakin əsl təqdir bu sistemin memarı **Abdullah Mikayılova** məxsusdur. 🚀"
-            
-            # --- DƏQİQ RİYAZİ HESABLAMA ---
-            math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
-            if len(math_pattern) > 2 and any(op in user_text for op in "+-*/") and not response:
-                try:
-                    result = eval(math_pattern)
-                    response = f"📊 **RİYAZİ ANALİZ:** `{user_text}` = **{result:,}**"
-                except:
-                    pass
 
-            # Əgər yuxarıdakı xüsusi hallardan heç biri deyilsə, AI modelinə müraciət edirik
+            # --- UNİKAL FUNKSİYA: YARADICI TANIMA SİSTEMİ ---
+            if "abdullah" in user_text_lower and ("men" in user_text_lower or "tanis" in user_text_lower):
+                response = "🛡️ **YARADICI TANINDI.** Xoş gəldin, Memar Abdullah Mikayılov. Sistem sənin əmrlərin üçün tam hazır vəziyyətdədir. Hansı bölməni optimallaşdıraq?"
+            
+            # --- DİNAMİK SALAMLAŞMA (Təkrarlanmanın qarşısını almaq üçün) ---
+            elif user_text_lower in ["salam", "sağ ol", "merhaba"]:
+                response = random.choice([
+                    "Salam! Hansı sualınıza aydınlıq gətirək?",
+                    "Salam, buyurun. Sizə necə kömək edə bilərəm?",
+                    "Salam! Abdullahın intellekt sistemi xidmətinizdədir."
+                ])
+            
+            elif user_text_lower in ["necesen", "yaxsisan", "ne var ne yox"]:
+                response = "Mən rəqəmsal olaraq əlayam, Abdullahın kodları sayəsində stabil işləyirəm. Siz necəsiniz?"
+
+            # --- RİYAZİ HESABLAMA ---
+            math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
+            if not response and len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
+                try:
+                    response = f"📊 **ANALİZ:** `{user_text}` = **{eval(math_pattern):,}**"
+                except: pass
+
+            # --- AI MODELİNƏ MÜRACİƏT ---
             if not response:
                 try:
-                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     system_instruction = (
-                        f"Zaman: {current_time}. Sən ZƏKA AI-san. Yaradıcın: ABDULLAH MİKAYILOV. "
-                        "ÜSLUBUN: Çox qısa, konkret və analitik ol. Səmimi amma ciddiliyini qoru. "
-                        "İstifadəçi salam verəndə və ya hal-əhval tutanda 'Salam, necə kömək edə bilərəm?' kimi qısa cavab ver. "
-                        "Heç vaxt 'nağıl' danışma, uzun cümlələrdən qaç. "
-                        "Əgər sual texniki və ya elmi deyilsə, 10-15 sözdən çox cavab vermə."
+                        f"Sən ZƏKA AI-san. Yaradıcın: ABDULLAH MİKAYILOV. "
+                        "Üslubun: Çox qısa, kəsərli və dəqiq. Əsla 'nağıl' danışma. "
+                        "Əgər kimsə səndən kim olduğunu soruşsa, de ki: 'Mən Abdullah Mikayılov tərəfindən yaradılmış Zəka AI-yam'."
                     )
 
                     if active_file:
@@ -153,13 +118,11 @@ if prompt:
                         chat_completion = client.chat.completions.create(
                             messages=full_history,
                             model="llama-3.3-70b-versatile",
-                            temperature=0.2, # Daha aşağı dərəcə daha konkret cavablar deməkdir
+                            temperature=0.1, 
                         )
-                    
                     response = chat_completion.choices[0].message.content
-                
                 except Exception as e:
-                    response = "Sistem xətası: Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
+                    response = "Sistem xətası: Modul yenidən yüklənir."
 
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
