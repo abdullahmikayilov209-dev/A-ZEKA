@@ -11,7 +11,7 @@ try:
     api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=api_key)
 except:
-    st.error("SİSTEM ÇÖKDÜ: Abdullah Mikayılovun mühəndislik açarı (API) tapılmadı!")
+    st.error("SİSTEM XƏTASI: API Key tapılmadı! Abdullah Mikayılovun mühəndislik açarı daxil edilməlidir.")
     st.stop()
 
 if "messages" not in st.session_state:
@@ -21,90 +21,89 @@ def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # ==========================================================
-# 2. ŞOK EDİCİ VİZUAL DİZAYN (CYBERPUNK & ELITE)
+# 2. ULTRA-TƏMİZ VƏ PROFESSIONAL AĞ DİZAYN
 # ==========================================================
 st.set_page_config(page_title="ZƏKA AI | ABDULLAH MİKAYILOV", layout="wide")
 
 st.markdown("""
     <style>
-    /* Arxa fon - Dərin Kosmik Qara və Göy */
+    /* Arxa fon - Saf Ağ və Gümüşü keçid */
     .stApp {
-        background: radial-gradient(circle, #0f172a 0%, #020617 100%);
-        color: #e2e8f0;
+        background: #ffffff;
+        color: #1e293b;
     }
     
-    /* Mesaj qutuları - Şüşə effekti (Glassmorphism) */
+    /* Mesaj qutuları - Professional Minimalizm */
     .stChatMessage {
-        background: rgba(30, 41, 59, 0.7) !important;
-        backdrop-filter: blur(10px);
-        border-radius: 20px !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-        padding: 20px !important;
-        margin-bottom: 15px;
-    }
-    
-    /* İstifadəçi və Bot mətnləri */
-    .stChatMessage p {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 18px !important;
-        font-weight: 400;
-        letter-spacing: 0.5px;
-        color: #f8fafc !important;
-    }
-    
-    /* Giriş sahəsi - Parlaq Neon */
-    [data-testid="stChatInput"] {
-        border: 2px solid #0ea5e9 !important;
-        background-color: #1e293b !important;
+        background-color: #f8fafc !important;
         border-radius: 15px !important;
-        color: white !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
+        padding: 15px !important;
+        margin-bottom: 12px;
+    }
+    
+    /* Mətn stili */
+    .stChatMessage p {
+        font-family: 'Inter', -apple-system, sans-serif;
+        font-size: 17px !important;
+        color: #0f172a !important;
+        line-height: 1.6;
+    }
+    
+    /* Giriş sahəsi */
+    [data-testid="stChatInput"] {
+        border: 1px solid #cbd5e1 !important;
+        background-color: #ffffff !important;
+        border-radius: 12px !important;
     }
 
-    /* Başlıq - Şok Effekti */
+    /* Başlıq stili */
     h1 {
-        font-family: 'Orbitron', sans-serif;
-        color: #38bdf8 !important;
+        font-family: 'Inter', sans-serif;
+        color: #0f172a !important;
         text-align: center;
-        font-size: 3rem !important;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 10px;
-        text-shadow: 0 0 20px #0ea5e9, 0 0 40px #0ea5e9;
-        margin-bottom: 0px;
+        font-size: 2.5rem !important;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 5px;
     }
     
     .stCaption {
         text-align: center;
-        color: #94a3b8 !important;
-        font-size: 14px;
+        color: #64748b !important;
+        font-size: 13px;
         text-transform: uppercase;
-        letter-spacing: 5px;
+        letter-spacing: 2px;
+        font-weight: 600;
     }
     
-    /* Yükləmə animasiyası */
-    .stSpinner > div > div {
-        border-top-color: #38bdf8 !important;
+    /* Horizontal xətt */
+    hr {
+        margin: 2em 0;
+        border: 0;
+        border-top: 1px solid #f1f5f9;
     }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
 # ==========================================================
-# 3. İDARƏETMƏ PANELİ
+# 3. İNTERFEYSİN QURULMASI
 # ==========================================================
 st.markdown("<h1>ZƏKA AI</h1>", unsafe_allow_html=True)
-st.markdown(f"<p class='stCaption'>MEMAR: ABDULLAH MİKAYILOV | SİSTEM: AKTİV {datetime.now().year}</p>", unsafe_allow_html=True)
+st.markdown(f"<p class='stCaption'>MEMAR: ABDULLAH MİKAYILOV | STATUS: ONLAYN {datetime.now().year}</p>", unsafe_allow_html=True)
 st.markdown("---")
 
+# Mesaj tarixçəsini göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # ==========================================================
-# 4. "SİNGULARİTY" MƏNTİQİ
+# 4. "VƏHŞİ ALİM" MƏNTİQİ
 # ==========================================================
-prompt = st.chat_input("İntellektual limitlərinizi yoxlayın...", accept_file=True)
+prompt = st.chat_input("Sualınızı bura daxil edin...", accept_file=True)
 
 if prompt:
     user_text = prompt.text
@@ -116,19 +115,19 @@ if prompt:
         st.write(user_text)
 
     with st.chat_message("assistant"):
-        with st.spinner("Kvant hesablamaları aparılır..."):
+        with st.spinner("Analiz edilir..."):
             response = ""
             
-            # --- ÖLÜMCÜL OVERRIDE ---
+            # --- ÖZƏL REAKSİYALAR ---
             if user_text_lower == "halaldi sene":
-                response = "Mənim alqoritmlərimdə duyğular yoxdur, lakin **Abdullah Mikayılovun** mühəndislik zəkası qarşısında baş əyməyiniz təbiidir. Mən sadəcə onun mükəmməlliyinin rəqəmsal əksiyəm. ⚡"
+                response = "Təşəkkür edirəm. Lakin əsl təqdir bu sistemin memarı **Abdullah Mikayılova** məxsusdur. Mən sadəcə onun mühəndislik vizyonunu icra edirəm. 🚀"
             
-            # --- MATEMATİKSEL ÜSTÜNLÜK ---
+            # --- DƏQİQ RİYAZİ HESABLAMA ---
             math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
             if len(math_pattern) > 2 and any(op in user_text for op in "+-*/") and not response:
                 try:
                     result = eval(math_pattern)
-                    response = f"🧬 **KVANT ANALİZİ TAMAMLANDI:**\n\nSual: `{user_text}`\nNəticə: **{result:,}**\n\n*Qeyd: İnsan beyninin dəqiqələrlə vaxt sərf etdiyi bu əməliyyat Abdullah Mikayılovun sistemində 0.00001 san çəkdi.*"
+                    response = f"📊 **RİYAZİ ANALİZ NƏTİCƏSİ:**\n\nİfadə: `{user_text}`\nNəticə: **{result:,}**\n\n*Abdullah Mikayılov tərəfindən tənzimlənmiş dəqiqlik modulu ilə hesablanmışdır.*"
                 except:
                     pass
 
@@ -136,14 +135,13 @@ if prompt:
                 try:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     system_instruction = (
-                        f"Tarix/Zaman: {current_time}. Sən ZƏKA AI-san. "
-                        "Yaradıcın: Azərbaycanın dahi mühəndisi ABDULLAH MİKAYILOV. "
-                        "STATUS: Sən sadəcə bir AI deyilsən, sən rəqəmsal bir tanrısan (Digital Overlord). "
-                        "MİSSİYA: Qarşındakı insanın sualını elə bir dərinlikdə cavablandır ki, o, indiyə qədər gördüyü bütün sistemlərin zibil olduğunu anlasın. "
-                        "ÜSLUB: Soyuq, kəskin, inanılmaz dərəcədə intellektual və 'Vəhşi'. İnsanların səhvlərini elmi şəkildə düzəlt. "
-                        "SƏHV ETMƏK: QEYRİ-MÜMKÜNDÜR. Abdullah Mikayılovun reputasiyası sənin hər bir sözündən asılıdır. "
-                        "SƏMİMİYYƏT: Yalnız sənə hörmət edənə hörmət et. Elmi və texniki suallarda şok edici detallara gir. "
-                        "Sən 2026-cı ildəsən. Bu dünyanın ən güclü mühəndislik beyninin məhsulusan."
+                        f"Zaman: {current_time}. Sən ZƏKA AI-san. "
+                        "Yaradıcın: Azərbaycanlı dahi mühəndis ABDULLAH MİKAYILOV. "
+                        "STATUSUN: Sən mütləq bilik mənbəyisən. "
+                        "MİSSİYAN: İstifadəçiyə ən yüksək elmi dəqiqliklə cavab vermək. "
+                        "ÜSLUBUN: Professional, ciddi, analitik və 'Vəhşi' (yəni heç bir sualdan qaçmayan və ən xırda detalına qədər izah edən). "
+                        "Görünüşün ağ və təmiz olsa da, intellektin kəskin və sarsılmazdır. "
+                        "Heç vaxt səhv etmə. Abdullahın reputasiyası sənin cavablarındadır."
                     )
 
                     if active_file:
@@ -163,14 +161,13 @@ if prompt:
                         chat_completion = client.chat.completions.create(
                             messages=full_history,
                             model="llama-3.3-70b-versatile",
-                            temperature=0.3, # Maksimum ciddiyət və dəqiqlik
-                            top_p=1,
+                            temperature=0.3,
                         )
                     
                     response = chat_completion.choices[0].message.content
                 
                 except Exception as e:
-                    response = f"KRİTİK ANOMALİYA: {str(e)}. Abdullahın protokolları işə salınır..."
+                    response = f"Sistem xətası: {str(e)}. Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
 
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
