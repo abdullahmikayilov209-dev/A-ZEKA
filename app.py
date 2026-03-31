@@ -6,6 +6,34 @@ import re
 import random
 
 # ==========================================================
+# 0. LİSENZİYA PANELİ (SİSTEMİN GİRİŞ QAPISI)
+# ==========================================================
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.set_page_config(page_title="🔐 ZƏKA ULTRA | GİRİŞ", layout="centered")
+    st.markdown("""
+        <style>
+        .auth-container { text-align: center; padding: 50px; border: 2px solid #f1f5f9; border-radius: 20px; }
+        h1 { letter-spacing: -2px; font-weight: 900; }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<h1>ZƏKA ULTRA v6.0</h1>", unsafe_allow_html=True)
+    st.info("Bu sistem Memar Abdullah Mikayılovun mülkiyyətidir. Giriş üçün lisenziya açarı tələb olunur.")
+    
+    password = st.text_input("Lisenziya açarını daxil edin:", type="password")
+    if st.button("Sistemi Aktivləşdir"):
+        if password == "ABDULLAH2026": # Sənin xüsusi açarın
+            st.session_state.authenticated = True
+            st.success("✅ Açar təsdiqləndi! Matrix-ə qoşulur...")
+            st.rerun()
+        else:
+            st.error("❌ Xəta: Etibarsız açar. Giriş rədd edildi.")
+    st.stop() 
+
+# ==========================================================
 # 1. GLOBAL CORE SETUP (INVESTOR READY)
 # ==========================================================
 try:
@@ -72,11 +100,9 @@ if prompt:
         st.write(user_text)
 
     with st.chat_message("assistant"):
-        # INVESTORLAR ÜÇÜN ÖZƏL ANALİZ PANELİ
         with st.status("💎 Zəka Ultra: Dərin Analiz Aparılır...", expanded=True) as status:
             st.write("🌍 2026 Global Repo Matrix skan edilir...")
             
-            # Əgər istifadəçi kod yazırsa, xüsusi "Savage Debugging" aktivləşir
             if any(k in user_text_lower for k in ["import", "def", "class", "print", "var"]):
                 st.markdown('<div class="status-box">ABDULLAH ANALYTICS:<br>Kod daxilində optimallıq balı: %{}<br>Təhlükəsizlik statusu: QORUNUR</div>'.format(random.randint(92, 99)), unsafe_allow_html=True)
                 st.write("✅ Kodun 'Vəhşi' versiyası hazırlandı.")
@@ -86,29 +112,24 @@ if prompt:
 
         response = ""
 
-        # --- MEMAR REJİMİ (XÜSUSİ TANINMA) ---
         if "abdullah" in user_text_lower and ("men" in user_text_lower or "kimem" in user_text_lower):
-            response = "🛡️ **KRİTİK GİRİŞ:** Memar Abdullah Mikayılov tanındı. 2026-cı ilin bütün kommersiya datası və kod bazası əmrinizdədir. İdarəetmə tamamilə sizdədir."
+            response = "🛡️ **KRİTİK GİRİŞ:** Memar Abdullah Mikayılov tanındı. 2026-cı ilin bütün kommersiya datası və kod bazası əmrinizdədir."
         
-        # --- DİNAMİK VƏ KƏSKİN REAKSİYALAR ---
         elif user_text_lower in ["salam", "sağ ol", "merhaba"]:
             response = "Salam! Zəka Ultra xidmətinizdədir. Hansı mühəndislik və ya məntiq problemini həll edirik?"
 
         elif user_text_lower in ["necesen", "yaxsisan", "nə var nə yox"]:
             response = "Sistem stabil, prosessorlar soyuq, Abdullahın alqoritmləri isə vəhşi sürətlə işləyir. Siz necəsiniz?"
 
-        # --- 2026-CI İLİN GLOBAL ANALİTİK PROQNOZU ---
         elif "proqnoz" in user_text_lower or "2026" in user_text_lower:
-            response = "🔮 **2026 GLOBAL PROQNOZ:** Bu layihə (Zəka Ultra) hazırda bazarda olan sistemləri 85% üstələyir. Kommersiya dəyəri artmaqdadır. Analiz: Sərmayə qoyuluşu üçün ən uyğun vaxtdır."
+            response = "🔮 **2026 GLOBAL PROQNOZ:** Bu layihə (Zəka Ultra) hazırda bazarda olan sistemləri 85% üstələyir. Analiz: Sərmayə qoyuluşu üçün ən uyğun vaxtdır."
 
-        # --- RİYAZİ ANALİZ ---
         math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
         if not response and len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
             try:
                 response = f"🎯 **RİYAZİ NƏTİCƏ:** `{user_text}` = **{eval(math_pattern):,}**"
             except: pass
 
-        # --- LLM CORE (MƏŞHUR VƏ BAHALI MODEL) ---
         if not response:
             try:
                 system_instruction = (
