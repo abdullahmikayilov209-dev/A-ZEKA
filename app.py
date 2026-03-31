@@ -27,13 +27,10 @@ st.set_page_config(page_title="ZƏKA AI | ABDULLAH MİKAYILOV", layout="wide")
 
 st.markdown("""
     <style>
-    /* Arxa fon - Saf Ağ və Gümüşü keçid */
     .stApp {
         background: #ffffff;
         color: #1e293b;
     }
-    
-    /* Mesaj qutuları - Professional Minimalizm */
     .stChatMessage {
         background-color: #f8fafc !important;
         border-radius: 15px !important;
@@ -42,23 +39,17 @@ st.markdown("""
         padding: 15px !important;
         margin-bottom: 12px;
     }
-    
-    /* Mətn stili */
     .stChatMessage p {
         font-family: 'Inter', -apple-system, sans-serif;
         font-size: 17px !important;
         color: #0f172a !important;
         line-height: 1.6;
     }
-    
-    /* Giriş sahəsi */
     [data-testid="stChatInput"] {
         border: 1px solid #cbd5e1 !important;
         background-color: #ffffff !important;
         border-radius: 12px !important;
     }
-
-    /* Başlıq stili */
     h1 {
         font-family: 'Inter', sans-serif;
         color: #0f172a !important;
@@ -68,7 +59,6 @@ st.markdown("""
         letter-spacing: -1px;
         margin-bottom: 5px;
     }
-    
     .stCaption {
         text-align: center;
         color: #64748b !important;
@@ -77,8 +67,6 @@ st.markdown("""
         letter-spacing: 2px;
         font-weight: 600;
     }
-    
-    /* Horizontal xətt */
     hr {
         margin: 2em 0;
         border: 0;
@@ -95,13 +83,12 @@ st.markdown("<h1>ZƏKA AI</h1>", unsafe_allow_html=True)
 st.markdown(f"<p class='stCaption'>MEMAR: ABDULLAH MİKAYILOV | STATUS: ONLAYN {datetime.now().year}</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Mesaj tarixçəsini göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # ==========================================================
-# 4. "VƏHŞİ ALİM" MƏNTİQİ
+# 4. "ZƏKA" MƏNTİQİ VƏ ANALİZ
 # ==========================================================
 prompt = st.chat_input("Sualınızı bura daxil edin...", accept_file=True)
 
@@ -120,28 +107,28 @@ if prompt:
             
             # --- ÖZƏL REAKSİYALAR ---
             if user_text_lower == "halaldi sene":
-                response = "Təşəkkür edirəm. Lakin əsl təqdir bu sistemin memarı **Abdullah Mikayılova** məxsusdur. Mən sadəcə onun mühəndislik vizyonunu icra edirəm. 🚀"
+                response = "Təşəkkür edirəm. Lakin əsl təqdir bu sistemin memarı **Abdullah Mikayılova** məxsusdur. 🚀"
             
             # --- DƏQİQ RİYAZİ HESABLAMA ---
             math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
             if len(math_pattern) > 2 and any(op in user_text for op in "+-*/") and not response:
                 try:
                     result = eval(math_pattern)
-                    response = f"📊 **RİYAZİ ANALİZ NƏTİCƏSİ:**\n\nİfadə: `{user_text}`\nNəticə: **{result:,}**\n\n*Abdullah Mikayılov tərəfindən tənzimlənmiş dəqiqlik modulu ilə hesablanmışdır.*"
+                    response = f"📊 **RİYAZİ ANALİZ:** `{user_text}` = **{result:,}**"
                 except:
                     pass
 
             if not response:
                 try:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    # YENİLƏNMİŞ SİSTEM TƏLİMATI (QISA VƏ KONKRET)
                     system_instruction = (
-                        f"Zaman: {current_time}. Sən ZƏKA AI-san. "
-                        "Yaradıcın: Azərbaycanlı dahi mühəndis ABDULLAH MİKAYILOV. "
-                        "STATUSUN: Sən mütləq bilik mənbəyisən. "
-                        "MİSSİYAN: İstifadəçiyə ən yüksək elmi dəqiqliklə cavab vermək. "
-                        "ÜSLUBUN: Professional, ciddi, analitik və 'Vəhşi' (yəni heç bir sualdan qaçmayan və ən xırda detalına qədər izah edən). "
-                        "Görünüşün ağ və təmiz olsa da, intellektin kəskin və sarsılmazdır. "
-                        "Heç vaxt səhv etmə. Abdullahın reputasiyası sənin cavablarındadır."
+                        f"Zaman: {current_time}. Sən ZƏKA AI-san. Yaradıcın: ABDULLAH MİKAYILOV. "
+                        "ÜSLUBUN: Professional, kəsərli və çox konkret ol. "
+                        "Səndən uzun izahat tələb olunmadıqca, suallara 1-2 cümlə ilə qısa cavab ver. "
+                        "Artıq sözlərdən və 'nağıl' danışmaqdan qaç. "
+                        "Salamlaşma və hal-əhval tutan mesajlara qısa və səmimi cavab ver. "
+                        "Yalnız mürəkkəb elmi və ya texniki suallarda dərin analiz apar."
                     )
 
                     if active_file:
@@ -161,13 +148,13 @@ if prompt:
                         chat_completion = client.chat.completions.create(
                             messages=full_history,
                             model="llama-3.3-70b-versatile",
-                            temperature=0.3,
+                            temperature=0.3, # Aşağı temperatur daha dəqiq və az "yaradıcı" (nağılsız) cavab verir
                         )
                     
                     response = chat_completion.choices[0].message.content
                 
                 except Exception as e:
-                    response = f"Sistem xətası: {str(e)}. Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
+                    response = f"Sistem xətası: Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
 
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
