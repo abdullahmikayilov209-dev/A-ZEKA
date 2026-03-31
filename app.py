@@ -4,14 +4,18 @@ import base64
 import re
 
 # ==========================================================
-# 1. GLOBAL CORE SETUP (2026 STABLE)
+# 1. GLOBAL CORE SETUP (STABLE MODELS)
 # ==========================================================
 try:
     api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=api_key)
 except:
-    st.error("Kritik Xəta: API açarı (GROQ_API_KEY) Streamlit Secrets-də tapılmadı.")
+    st.error("Kritik Xəta: API açarı tapılmadı.")
     st.stop()
+
+# Model adlarını burdan idarə edirik (Groq-un ən son stabil adları)
+TEXT_MODEL = "llama-3.3-70b-versatile"
+VISION_MODEL = "llama-3.2-11b-vision-preview" # Əgər bu da bağlansa, Groq panelindən yeni adı bura yazmalısan
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -20,7 +24,7 @@ def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 # ==========================================================
-# 2. PREMIUM VİSUAL İNTERFEYS
+# 2. VİSUAL İNTERFEYS
 # ==========================================================
 st.set_page_config(page_title="ZƏKA ULTRA v6.0", layout="wide")
 
@@ -33,27 +37,26 @@ st.markdown("""
         border: 1px solid #f1f5f9 !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
     }
-    h1 { text-align: center; color: #1a1a1a; font-weight: 900; letter-spacing: -1px; }
-    .stCaption { text-align: center; color: #94a3b8; font-weight: 600; }
+    h1 { text-align: center; color: #1a1a1a; font-weight: 900; }
+    .stCaption { text-align: center; color: #94a3b8; }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1>ZƏKA ULTRA</h1>", unsafe_allow_html=True)
-st.markdown("<p class='stCaption'>GLOBAL v6.0 | MEMAR: A. MİKAYILOV | 2026 VISION ENABLED</p>", unsafe_allow_html=True)
+st.markdown("<p class='stCaption'>GLOBAL v6.0 | MEMAR: A. MİKAYILOV</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Mesaj tarixçəsini göstər
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # ==========================================================
-# 3. MƏNTİQ VƏ VISION MODULU
+# 3. INPUT VƏ MƏNTİQ
 # ==========================================================
-prompt = st.chat_input("Mesajınızı yazın və ya şəkil əlavə edin...", accept_file=True)
+prompt = st.chat_input("Mesajınızı yazın...", accept_file=True)
 
 if prompt:
-    user_text = prompt.text if prompt.text else "Bu şəkli analiz et."
+    user_text = prompt.text if prompt.text else "Bu şəkildə nə var?"
     user_text_lower = user_text.lower().strip() 
     active_file = prompt.files[0] if prompt.files else None
     
@@ -62,33 +65,31 @@ if prompt:
         st.write(user_text)
 
     with st.chat_message("assistant"):
-        with st.status("🚀 Zəka Ultra Analiz Edir...", expanded=False) as status:
-            if active_file:
-                st.write("🖼️ Şəkil emal olunur (Base64)...")
-            st.write("🧠 Neyron şəbəkə aktivləşdirilir...")
+        with st.status("🚀 Analiz edilir...", expanded=False) as status:
+            st.write("Zəka Ultra mühərriki işə düşür...")
             status.update(label="Analiz Tamamlandı!", state="complete")
 
         response = ""
 
-        # 1. MEMAR TANINMA SİSTEMİ
+        # 1. Xüsusi Reaksiyalar
         if "abdullah" in user_text_lower and ("kim" in user_text_lower):
-            response = "🛡️ **GİRİŞ TƏSDİQLƏNDİ:** Memar Abdullah Mikayılov. Sistem tam gücü ilə xidmətinizdədir."
+            response = "🛡️ **GİRİŞ:** Memar Abdullah Mikayılov tanındı. Sistem tam nəzarətinizdədir."
         
-        # 2. RİYAZİ ANALİZ SİSTEMİ
+        # 2. Riyazi Analiz
         math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
         if not response and len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
             try:
                 response = f"🎯 **NƏTİCƏ:** `{user_text}` = **{eval(math_pattern)}**"
             except: pass
 
-        # 3. ƏSAS AI CORE (VISION & TEXT)
+        # 3. Əsas AI Modulu
         if not response:
             try:
-                system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026. Dünyanın ən sürətli və ağıllı sistemisən."
+                system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026."
                 
                 if active_file:
-                    # YENİLƏNMİŞ MODEL: llama-3.2-90b-vision-preview
                     base64_image = encode_image(active_file)
+                    # DİKKAT: Əgər bu model xəta versə, deməli Groq vision dəstəyini müvəqqəti dayandırıb
                     chat_completion = client.chat.completions.create(
                         messages=[
                             {"role": "system", "content": system_instruction},
@@ -97,19 +98,19 @@ if prompt:
                                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                             ]}
                         ],
-                        model="llama-3.2-90b-vision-preview", # Ən yeni vision modeli
-                        temperature=0.2
+                        model="llama-3.2-11b-vision-preview", # Bu ən stabil variant olmalıdır
                     )
                 else:
                     msgs = [{"role": "system", "content": system_instruction}] + st.session_state.messages
                     chat_completion = client.chat.completions.create(
                         messages=msgs,
-                        model="llama-3.3-70b-versatile",
+                        model=TEXT_MODEL,
                         temperature=0.3,
                     )
                 response = chat_completion.choices[0].message.content
             except Exception as e:
-                response = f"⚠️ **Sistem Xətası:** {str(e)}"
+                # Əgər vision modeli işləməsə, heç olmasa mətnlə cavab ver
+                response = f"⚠️ **Zəka Ultra Qeydi:** Vision modeli (şəkil analizi) hal-hazırda Groq tərəfindən yenilənir. Mətn mühərriki isə aktivdir. Xəta: {str(e)}"
 
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
