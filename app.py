@@ -105,8 +105,14 @@ if prompt:
         with st.spinner("Analiz edilir..."):
             response = ""
             
-            # --- ÖZƏL REAKSİYALAR ---
-            if user_text_lower == "halaldi sene":
+            # --- ÖZƏL REAKSİYALAR (Sürətli və Konkret) ---
+            greetings = ["salam", "salam aleykum", "sağ ol", "necesen", "nə var nə yox", "merhaba"]
+            
+            # Əgər istifadəçi sadəcə salam verirsə, API-ni yormadan birbaşa cavab veririk:
+            if user_text_lower in greetings:
+                response = "Salam! Sizə hansı mövzuda kömək edə bilərəm? Buyurun, sualınızı verin."
+            
+            elif "halaldi sene" in user_text_lower:
                 response = "Təşəkkür edirəm. Lakin əsl təqdir bu sistemin memarı **Abdullah Mikayılova** məxsusdur. 🚀"
             
             # --- DƏQİQ RİYAZİ HESABLAMA ---
@@ -118,17 +124,16 @@ if prompt:
                 except:
                     pass
 
+            # Əgər yuxarıdakı xüsusi hallardan heç biri deyilsə, AI modelinə müraciət edirik
             if not response:
                 try:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    # YENİLƏNMİŞ SİSTEM TƏLİMATI (QISA VƏ KONKRET)
                     system_instruction = (
                         f"Zaman: {current_time}. Sən ZƏKA AI-san. Yaradıcın: ABDULLAH MİKAYILOV. "
-                        "ÜSLUBUN: Professional, kəsərli və çox konkret ol. "
-                        "Səndən uzun izahat tələb olunmadıqca, suallara 1-2 cümlə ilə qısa cavab ver. "
-                        "Artıq sözlərdən və 'nağıl' danışmaqdan qaç. "
-                        "Salamlaşma və hal-əhval tutan mesajlara qısa və səmimi cavab ver. "
-                        "Yalnız mürəkkəb elmi və ya texniki suallarda dərin analiz apar."
+                        "ÜSLUBUN: Çox qısa, konkret və analitik ol. Səmimi amma ciddiliyini qoru. "
+                        "İstifadəçi salam verəndə və ya hal-əhval tutanda 'Salam, necə kömək edə bilərəm?' kimi qısa cavab ver. "
+                        "Heç vaxt 'nağıl' danışma, uzun cümlələrdən qaç. "
+                        "Əgər sual texniki və ya elmi deyilsə, 10-15 sözdən çox cavab vermə."
                     )
 
                     if active_file:
@@ -148,13 +153,13 @@ if prompt:
                         chat_completion = client.chat.completions.create(
                             messages=full_history,
                             model="llama-3.3-70b-versatile",
-                            temperature=0.3, # Aşağı temperatur daha dəqiq və az "yaradıcı" (nağılsız) cavab verir
+                            temperature=0.2, # Daha aşağı dərəcə daha konkret cavablar deməkdir
                         )
                     
                     response = chat_completion.choices[0].message.content
                 
                 except Exception as e:
-                    response = f"Sistem xətası: Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
+                    response = "Sistem xətası: Abdullahın təhlükəsizlik protokolları aktivləşdirilir."
 
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
