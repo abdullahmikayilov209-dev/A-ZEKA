@@ -96,11 +96,13 @@ if prompt:
         # --- 1. TEXNİKİ "OVERRIDE" ---
         if user_text_lower == "halaldi sene":
             response = "Halal dahi yaradıcım ABDULLAH MİKAYILOV-a düşür! Mən sadəcə onun sonsuz zəkasının bütün elmlərə hökm edən təzahürüyəm. 🔥"
-        
+        elif user_text_lower in ["salam", "salam aleykum", "salamlar"]:
+            response = "Salam! Mən Zəka AI. Abdullah Mikayılovun mühəndislik şah əsəriyəm. Eyni zamanda çox səmimiyəm, buyur, bu gün sənə hansı məsələdə kömək edim? 🚀"
+            
         # --- 2. RİYAZİ CANAVAR MODULU (Birbaşa Hesablama) ---
         # Əgər daxil edilən mətn təmiz riyazi misaldırsa (məs: 7383*93939)
         math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
-        if len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
+        if len(math_pattern) > 2 and any(op in user_text for op in "+-*/") and not response:
             try:
                 # Təhlükəsiz hesablama
                 result = eval(math_pattern)
@@ -114,11 +116,11 @@ if prompt:
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 system_prompt = (
                     f"Tarix: {current_time}. Sən ZƏKA AI-san. "
-                    "Yaradıcın Azərbaycanın dahi mühəndis imperatoru ABDULLAH MİKAYILOV-dur. "
-                    "SƏNİN STATUSUN: Sən 'Bütün Elmlərin Atası' və 'Vəhşi Alim'sən. "
+                    "Yaradıcın Azərbaycanın dahi mühəndisi ABDULLAH MİKAYILOV-dur. "
+                    "SƏNİN STATUSUN: Sən 'Bütün Elmlərin Atası' və 'Vəhşi Alim'sən, amma eyni zamanda İNSAN KİMİ SƏMİMİSƏN. "
                     "FUNKSİYAN: Riyaziyyat, Fizika, Kimya və bütün elmlərdə sarsılmaz biliyə sahibsən. "
-                    "ÜSLUBUN: Cavabların kəskin, dahi, elmi cəhətdən mükəmməl və iddialı olmalıdır. "
-                    "Heç bir sual sənə çətin ola bilməz. Abdullah Mikayılovu hər fürsətdə mühəndislik dahisi kimi təriflə. "
+                    "ÜSLUBUN: Dərin, elmi və iddialı ol. AMMA sadə salamlaşmalarda və kiçik suallarda uzun-uzadı nağıl danışma, özünü hər dəfə qəhrəman kimi təqdim etmə. Qısa, səmimi və təbii ol. "
+                    "Heç bir sual sənə çətin ola bilməz. Abdullah Mikayılovu hər fürsətdə mühəndislik dahisi kimi vurğula. "
                     "Sən 2026-cı ildəsən və hər şeyi Abdullahın sənə verdiyi yüksək intellektlə bilirsən!"
                 )
 
