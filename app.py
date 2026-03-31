@@ -1,30 +1,30 @@
 import streamlit as st
-from groq import Groq
-import base64
+import google.generativeai as genai # Groq yerinə Gemini kitabxanası
+from PIL import Image # Şəkilləri emal etmək üçün
 import re
 
 # ==========================================================
-# 1. GLOBAL CORE SETUP (RƏSMİ 2026 STABLE MODELLƏR)
+# 1. GLOBAL CORE SETUP (NEW GEMINI VISION ENGINE)
 # ==========================================================
+# DİQQƏT: Gemini API açarını Streamlit Secrets-ə əlavə et (GEMINI_API_KEY)
+# Lokalda işləyirsənsə, .streamlit/secrets.toml faylına yaz.
 try:
-    api_key = st.secrets["GROQ_API_KEY"]
-    client = Groq(api_key=api_key)
+    api_key = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=api_key)
+    
+    # Şəkil analizi üçün ən yeni və güclü model
+    vision_model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    # Yalnız mətn üçün model
+    text_model = genai.GenerativeModel('gemini-1.5-flash')
 except:
-    st.error("Kritik Xəta: API açarı tapılmadı.")
+    st.error("Kritik Xəta: Gemini API açarı (GEMINI_API_KEY) tapılmadı.")
     st.stop()
-
-# DİQQƏT: Artıq "preview" deyil, rəsmi "instruct" modelidir!
-VISION_MODEL_NAME = "llama-3.2-11b-vision-instruct" 
-TEXT_MODEL_NAME = "llama-3.3-70b-versatile"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-def encode_image(image_file):
-    return base64.b64encode(image_file.read()).decode('utf-8')
-
 # ==========================================================
-# 2. VİSUAL İNTERFEYS (PREMIUM)
+# 2. PREMIUM VİSUAL İNTERFEYS (2026 STANDARDI)
 # ==========================================================
 st.set_page_config(page_title="ZƏKA ULTRA v6.0", layout="wide")
 
@@ -43,7 +43,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("<h1>ZƏKA ULTRA</h1>", unsafe_allow_html=True)
-st.markdown("<p class='stCaption'>GLOBAL v6.0 | MEMAR: A. MİKAYILOV</p>", unsafe_allow_html=True)
+st.markdown("<p class='stCaption'>GLOBAL v6.0 | MEMAR: A. MİKAYILOV | GEMINI POWERED</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 for message in st.session_state.messages:
@@ -51,13 +51,12 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # ==========================================================
-# 3. INPUT VƏ MƏNTİQ
+# 3. INPUT VƏ MƏNTİQ (O İSTƏDİYİN + İKONASI BURDADIR)
 # ==========================================================
-# Streamlit-in accept_file=True funksiyası o istədiyin "+" (əlavə et) ikonunu avtomatik yaradır
 prompt = st.chat_input("Mesajınızı yazın...", accept_file=True)
 
 if prompt:
-    user_text = prompt.text if prompt.text else "Bu şəkli detallı analiz et və nə gördüyünü yaz."
+    user_text = prompt.text if prompt.text else "Bu şəkildə nə var?"
     active_file = prompt.files[0] if prompt.files else None
     
     st.session_state.messages.append({"role": "user", "content": user_text})
@@ -66,55 +65,50 @@ if prompt:
 
     with st.chat_message("assistant"):
         with st.status("🚀 Zəka Ultra Analiz Edir...", expanded=False) as status:
-            st.write("Mühərrik işə düşdü...")
+            if active_file:
+                st.write("🖼️ Şəkil emal olunur (Gemini Vision)...")
+            st.write("🧠 Neyron şəbəkə aktivləşdirilir...")
             status.update(label="Analiz Tamamlandı!", state="complete")
 
         response = ""
         user_text_lower = user_text.lower().strip()
 
-        # Xüsusi Reaksiyalar
-        if "abdullah" in user_text_lower:
-            response = "🛡️ **SİSTEM MESAJI:** Memar Abdullah Mikayılov tanındı. Xoş gəldiniz."
+        # 1. MEMAR TANINMA SİSTEMİ
+        if "abdullah" in user_text_lower and ("kim" in user_text_lower):
+            response = "🛡️ **GİRİŞ:** Memar Abdullah Mikayılov tanındı. Zəka Ultra tam əmrinizdədir."
         
+        # 2. RİYAZİ ANALİZ SİSTEMİ
         math_pattern = re.sub(r'[^0-9+\-*/(). ]', '', user_text)
         if not response and len(math_pattern) > 2 and any(op in user_text for op in "+-*/"):
             try:
                 response = f"🎯 **RİYAZİ NƏTİCƏ:** `{user_text}` = **{eval(math_pattern)}**"
             except: pass
 
-        # Əsas AI Modulu
+        # 3. ƏSAS GEMINI AI CORE (HƏLL YOLU)
         if not response:
             try:
-                system_instruction = "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026. Şəkilləri və mətnləri yüksək dəqiqliklə analiz edirsən."
+                # Sistem təlimatı
+                system_instruction = (
+                    "Sən ZƏKA ULTRA-san. Yaradıcın Abdullah Mikayılovdur. İL 2026. "
+                    "Soyuqqanlı, dəqiq və professional ol. Şəkilləri və mətnləri "
+                    "vəhşi bir sürətlə analiz edirsən."
+                )
                 
                 if active_file:
-                    base64_image = encode_image(active_file)
-                    # YENİ RƏSMİ VISION SORĞUSU
-                    chat_completion = client.chat.completions.create(
-                        messages=[
-                            {"role": "system", "content": system_instruction},
-                            {"role": "user", "content": [
-                                {"type": "text", "text": user_text},
-                                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                            ]}
-                        ],
-                        model=VISION_MODEL_NAME,
-                    )
+                    # GEMINI VISION REQUEST (HEÇ VAXT ÇÖKMÜR)
+                    img = Image.open(active_file)
+                    # Təlimatı və sualı bir yerdə göndəririk
+                    chat_completion = vision_model.generate_content([system_instruction, user_text, img])
                 else:
-                    # TEXT ONLY REQUEST
-                    msgs = [{"role": "system", "content": system_instruction}] + st.session_state.messages
-                    chat_completion = client.chat.completions.create(
-                        messages=msgs,
-                        model=TEXT_MODEL_NAME,
-                    )
-                response = chat_completion.choices[0].message.content
+                    # GEMINI TEXT REQUEST
+                    # Tarixçəni sistem təlimatı ilə birləşdir
+                    msgs = [{"role": "user", "content": system_instruction}] + st.session_state.messages
+                    # Sadələşdirilmiş text request (generate_content daha stabil işləyir)
+                    chat_completion = text_model.generate_content(msgs)
+                
+                response = chat_completion.text
             except Exception as e:
-                # Əgər yene xəta olsa, sistemi çökdürmə, səliqəli cavab ver
-                error_msg = str(e)
-                if "decommissioned" in error_msg or "400" in error_msg or "404" in error_msg:
-                    response = "⚠️ **Zəka Ultra Bildirişi:** Groq hazırda şəkil mühərrikində (Vision API) yenilənmə aparır. Lütfən hələlik yalnız mətnlə sual verin. Mətn mühərriki 100% aktivdir!"
-                else:
-                    response = f"⚠️ **Sistem Xətası:** Zəka Ultra serverlə bağlana bilmədi. Detal: {error_msg}"
+                response = f"⚠️ **Sistem Xətası:** Zəka Ultra serverlə bağlana bilmədi. Detal: {str(e)}"
 
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
